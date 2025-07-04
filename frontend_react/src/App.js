@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import GenreSelector from './GenreSelector';
+import GenreSummary from './GenreSummary';
 
 /*
   PUBLIC_INTERFACE
@@ -57,12 +58,9 @@ function App() {
           />
         </section>
 
-        {/* Genre Summary Section (placeholder) */}
+        {/* Genre Summary Section */}
         <section className="genre-summary-section">
-          {/* Placeholder: Genre summary (from Wikipedia) */}
-          <div className="placeholder summary-placeholder">
-            Short genre overview will appear here.
-          </div>
+          <GenreSummary genre={selectedGenre} />
         </section>
 
         {/* Book Grid Section (placeholder) */}
