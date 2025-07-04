@@ -7,15 +7,17 @@ import BooksGrid from './BooksGrid';
 /*
   PUBLIC_INTERFACE
   Main App layout for the Literary Genre Explorer.
-  - Header at top
-  - Section for genre selection (searchable input/dropdown)
-  - Section for genre summary (fetched from Wikipedia)
-  - Section for grid of books (from Google Books API)
-  - Theme toggle
+
+  Handles:
+    - Theme selection (light/dark) and applies CSS variable.
+    - Genre selection state.
+    - Propagating only essential props to subcomponents.
+    - Ensures state stays at appropriate owner layer.
+    - Assembles and coordinates subcomponents responsively.
 */
 function App() {
   const [theme, setTheme] = useState('light');
-  const [selectedGenre, setSelectedGenre] = useState(""); // state for selected genre
+  const [selectedGenre, setSelectedGenre] = useState(''); // Main app state: current genre
 
   // Effect to apply theme to document element
   useEffect(() => {
@@ -24,47 +26,47 @@ function App() {
 
   // PUBLIC_INTERFACE
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  // Handler for when a genre is selected
+  // PUBLIC_INTERFACE
   const handleGenreSelect = (genre) => {
     setSelectedGenre(genre);
   };
 
   return (
     <div className="App">
-      <button 
+      {/* Theme Toggle: sits above main layout for easy access */}
+      <button
         className="theme-toggle"
         onClick={toggleTheme}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       >
         {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
       </button>
-      {/* Header */}
+      {/* App header */}
       <header className="app-header-main">
         <h1 className="app-title">Literary Genre Explorer</h1>
-        <span className="app-subtitle">Discover genres &amp; their most influential books</span>
+        <span className="app-subtitle">
+          Discover genres & their most influential books
+        </span>
       </header>
-
-      {/* Main Content */}
+      {/* Main content, all state management flows from App */}
       <main className="app-main-content">
-        {/* Genre Selection Area */}
-        <section className="genre-selector-section">
-          {/* GenreSelector (searchable dropdown) */}
+        {/* Genre Selection */}
+        <section className="genre-selector-section" aria-label="Genre selection area">
           <GenreSelector
             value={selectedGenre}
             onGenreSelect={handleGenreSelect}
+            // Optionally could add genres prop here for expansion
           />
         </section>
-
-        {/* Genre Summary Section */}
-        <section className="genre-summary-section">
+        {/* Genre summary */}
+        <section className="genre-summary-section" aria-label="Genre summary area">
           <GenreSummary genre={selectedGenre} />
         </section>
-
-        {/* Book Grid Section (interactive, responsive) */}
-        <section className="book-grid-section">
+        {/* Book grid */}
+        <section className="book-grid-section" aria-label="Books grid area">
           <BooksGrid genre={selectedGenre} />
         </section>
       </main>
