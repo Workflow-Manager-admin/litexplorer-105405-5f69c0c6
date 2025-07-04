@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import GenreSelector from './GenreSelector';
 
 /*
   PUBLIC_INTERFACE
@@ -12,6 +13,7 @@ import './App.css';
 */
 function App() {
   const [theme, setTheme] = useState('light');
+  const [selectedGenre, setSelectedGenre] = useState(""); // state for selected genre
 
   // Effect to apply theme to document element
   useEffect(() => {
@@ -21,6 +23,12 @@ function App() {
   // PUBLIC_INTERFACE
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  };
+
+  // Handler for when a genre is selected
+  const handleGenreSelect = (genre) => {
+    setSelectedGenre(genre);
+    // Future: trigger data fetch for books, etc.
   };
 
   return (
@@ -40,12 +48,13 @@ function App() {
 
       {/* Main Content */}
       <main className="app-main-content">
-        {/* Genre Selection Area (placeholder) */}
+        {/* Genre Selection Area */}
         <section className="genre-selector-section">
-          {/* Placeholder: Genre selection (dropdown/inputs in future) */}
-          <div className="placeholder genre-select-placeholder">
-            Genre selection goes here
-          </div>
+          {/* GenreSelector (searchable dropdown) */}
+          <GenreSelector
+            value={selectedGenre}
+            onGenreSelect={handleGenreSelect}
+          />
         </section>
 
         {/* Genre Summary Section (placeholder) */}
