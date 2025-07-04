@@ -114,6 +114,125 @@
   flex-direction: column;
 }
 
+/* BooksGrid - Responsive book card grid */
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(236px, 1fr));
+  gap: 1.4rem;
+  width: 100%;
+  padding: 1rem 0.2rem 0.2rem 0.2rem;
+}
+
+/* BookCard styles */
+.book-card {
+  background: var(--bg-primary);
+  border-radius: 0.85rem;
+  box-shadow: 0 2px 8px rgba(30, 36, 50, 0.09);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 370px;
+  min-width: 0;
+  max-width: 320px;
+  width: 100%;
+  margin: 0 auto;
+  outline: none;
+  transition: box-shadow 0.12s, border-color 0.14s;
+}
+.book-card:focus-visible, .book-card:hover {
+  border-color: #6366f1;
+  box-shadow: 0 6px 22px rgba(99, 102, 241, 0.11);
+}
+
+.book-card-image-wrap {
+  width: 100%;
+  min-height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border-radius: 0.72rem 0.72rem 0 0;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-color);
+  height: 180px;
+}
+.book-card-thumbnail {
+  width: auto;
+  height: 164px;
+  object-fit: contain;
+  display: block;
+  margin: auto;
+  background: #eee;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 6px rgba(30,36,50,0.06);
+  max-width: 96%;
+}
+.book-card-noimage {
+  color: #bbb;
+  font-size: 1.14rem;
+  text-align: center;
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  font-style: italic;
+}
+
+/* BookCard content */
+.book-card-content {
+  padding: 1rem 1.2rem 1.12rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1;
+  min-height: 160px;
+}
+
+.book-card-title {
+  font-size: 1.16rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  margin-top: 0;
+  color: #374151;
+  line-height: 1.14;
+  letter-spacing: -0.5px;
+}
+[data-theme="dark"] .book-card-title {
+  color: #fbbf24;
+}
+.book-card-authors {
+  font-size: 0.97rem;
+  color: #6366f1;
+  opacity: 0.84;
+  margin-bottom: 0.45rem;
+  font-weight: 500;
+}
+
+.book-card-desc {
+  font-size: 0.98rem;
+  color: var(--text-primary);
+  margin: 0.5rem 0 0.68rem 0;
+  opacity: 0.93;
+  min-height: 48px;
+  line-height: 1.38;
+  flex: 1 1;
+}
+
+.book-preview-link {
+  font-size: 0.97rem;
+  background: #6366f1;
+  color: #fff !important;
+  text-decoration: none;
+  padding: 0.35em 0.9em;
+  border-radius: 0.42em;
+  align-self: flex-start;
+  margin-top: 0.19rem;
+  box-shadow: 0 1px 2px rgba(99,102,241,0.15);
+  transition: background 0.15s;
+}
+.book-preview-link:hover, .book-preview-link:focus {
+  background: #374151;
+  color: #fff;
+  outline: none;
+}
+
 /* Responsive Design */
 @media (max-width: 900px) {
   .app-main-content {

@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import GenreSelector from './GenreSelector';
 import GenreSummary from './GenreSummary';
+import BooksGrid from './BooksGrid';
 
 /*
   PUBLIC_INTERFACE
   Main App layout for the Literary Genre Explorer.
   - Header at top
-  - Section for genre selection (placeholder)
-  - Section for genre summary (placeholder)
-  - Section for grid of books (placeholder)
-  - Theme toggle for future support
+  - Section for genre selection (searchable input/dropdown)
+  - Section for genre summary (fetched from Wikipedia)
+  - Section for grid of books (from Google Books API)
+  - Theme toggle
 */
 function App() {
   const [theme, setTheme] = useState('light');
@@ -29,7 +30,6 @@ function App() {
   // Handler for when a genre is selected
   const handleGenreSelect = (genre) => {
     setSelectedGenre(genre);
-    // Future: trigger data fetch for books, etc.
   };
 
   return (
@@ -63,12 +63,9 @@ function App() {
           <GenreSummary genre={selectedGenre} />
         </section>
 
-        {/* Book Grid Section (placeholder) */}
+        {/* Book Grid Section (interactive, responsive) */}
         <section className="book-grid-section">
-          {/* Placeholder: Responsive grid of books */}
-          <div className="placeholder book-grid-placeholder">
-            Grid of books will appear here.
-          </div>
+          <BooksGrid genre={selectedGenre} />
         </section>
       </main>
     </div>
