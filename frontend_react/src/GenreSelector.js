@@ -51,7 +51,7 @@ function GenreSelector({
 
   // UI: simple custom dropdown + text input (unstyled for now)
   return (
-    <div style={{ position: "relative", maxWidth: 360, margin: "0 auto" }}>
+    <div className="genre-dropdown">
       <label htmlFor="genre-select-input" style={{ fontWeight: 500 }}>
         Select Genre
       </label>
@@ -61,14 +61,6 @@ function GenreSelector({
         autoComplete="off"
         value={searchTerm}
         placeholder={value ? value : "Type or select a genre..."}
-        style={{
-          width: "100%",
-          padding: "0.55rem 0.5rem",
-          marginTop: "0.4rem",
-          borderRadius: "0.5rem",
-          border: "1px solid #bbb",
-          boxSizing: "border-box"
-        }}
         onFocus={() => setDropdownOpen(true)}
         onBlur={() => setTimeout(() => setDropdownOpen(false), 120)}
         onChange={(e) => {
@@ -79,23 +71,7 @@ function GenreSelector({
       />
 
       {dropdownOpen && (
-        <ul
-          style={{
-            position: "absolute",
-            width: "100%",
-            background: "var(--bg-primary, #fff)",
-            border: "1px solid #bbb",
-            borderTop: "none",
-            maxHeight: 200,
-            overflowY: "auto",
-            borderRadius: "0 0 0.5rem 0.5rem",
-            zIndex: 10,
-            listStyle: "none",
-            padding: 0,
-            margin: 0,
-            boxShadow: "0 2px 6px rgba(30,36,50,0.06)"
-          }}
-        >
+        <ul className="genre-selector-dropdown-list">
           {/* Show filtered options or a stub "not found" */}
           {filteredGenres.length === 0 ? (
             <li
@@ -112,14 +88,12 @@ function GenreSelector({
             filteredGenres.map((genre, idx) => (
               <li
                 key={genre}
-                style={{
-                  padding: "0.7rem 1rem",
-                  background:
-                    genre === value
-                      ? "var(--border-color, #ececec)"
-                      : "transparent",
-                  cursor: "pointer"
-                }}
+                className="genre-selector-dropdown-item"
+                style={
+                  genre === value
+                    ? { background: "var(--border-color, #ececec)" }
+                    : undefined
+                }
                 onMouseDown={() => handleSelect(genre)}
                 aria-selected={genre === value}
               >
