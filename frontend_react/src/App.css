@@ -22,6 +22,23 @@ body, .App {
   font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
   transition: background 0.18s, color 0.18s;
   min-height: 100vh;
+  /* Parallax related overflow for effect */
+  overflow-x: hidden;
+}
+
+.background-parallax {
+  position: fixed;
+  top:0; left: 0; width: 100vw; height: 63vh;
+  pointer-events:none;
+  z-index: 0;
+  background: url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat;
+  will-change: transform;
+  opacity: 0.16;
+  filter: blur(3.5px) saturate(1.09) hue-rotate(-7deg) brightness(1.08);
+  transform: translateY(0px) scale(1.08);
+  transition: transform 0.18s cubic-bezier(.42,.6,.41,1.04);
+  border-radius: 0 0 1.6vw 1.6vw;
+  box-shadow: 0 40px 80px 0 rgba(99,102,241,0.10);
 }
 
 .explorer-header {
@@ -106,10 +123,28 @@ body, .App {
   box-shadow: 0 8px 22px rgba(99,102,241,0.08),
     0 2px 10px rgba(251,191,36,0.08);
   border: 1.5px solid var(--border-color);
-  backdrop-filter: blur(1.5px);
-  /* Light gradient divider at the bottom */
+  backdrop-filter: blur(2.8px) saturate(1.04);
   position: relative;
   overflow: hidden;
+  min-height: 70px;
+  /* Subtle floating layer for genre icon background */
+}
+.genre-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 0.88rem;
+  min-height: 39px;
+}
+
+.genre-summary-section:after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 22px; right: 22px; bottom: 0;
+  height: 2.5px;
+  border-radius: 1.5px;
+  background: linear-gradient(90deg, var(--secondary-color), var(--accent-color), var(--primary-color));
+  opacity: 0.15;
 }
 .genre-summary-section:after {
   content: '';
@@ -162,29 +197,76 @@ body, .App {
   gap: 0.8rem;
   padding: 1.17rem 1.15rem 1.07rem 1.15rem;
   min-height: 390px;
-  transition: box-shadow 0.24s, border 0.18s, transform 0.17s;
+  transition:
+    box-shadow 0.24s cubic-bezier(.6,1.2,.25,.96),
+    border 0.17s cubic-bezier(.42,.7,0.58,1.0),
+    transform 0.23s cubic-bezier(.42,1.1,.27,.97),
+    background 0.16s;
   border: 1.7px solid var(--border-color);
-  backdrop-filter: blur(2.5px) saturate(1.08);
+  backdrop-filter: blur(6px) saturate(1.07);
   position: relative;
   overflow: hidden;
+  outline: none;
+  cursor: pointer;
 }
 .book-card:before {
   content: '';
   display: block;
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  inset: 0;
   pointer-events: none;
   z-index: 0;
+  /* Subtle glimmer pass for glass effect */
   background: linear-gradient(162deg,
     rgba(251,191,36,0.07) 0%,
     rgba(99,102,241,0.04) 54%,
     rgba(255,255,255,0.11) 100%);
 }
-.book-card:hover, .book-card:focus-within {
-  box-shadow: 0 7px 24px 0 rgba(251,191,36,0.15), 0 2.5px 14px rgba(99,102,241,0.11);
-  border-color: var(--accent-color);
-  transform: translateY(-4px) scale(1.018);
+.book-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.79;
+  transition: opacity 0.38s cubic-bezier(.67,1.14,.46,.97);
+  border-radius: 1.15rem;
+  backdrop-filter: blur(12.5px) saturate(1.18) brightness(1.08);
+  filter: drop-shadow(0 2px 32px rgba(251,191,36,.04));
+}
+.book-card-content {
+  position: relative;
   z-index: 3;
+  display: flex;
+  flex-direction: column;
+  min-height: 265px;
+  flex: 1 1 100%;
+  opacity: 1;
+  transform: scale(1) translateY(0px);
+  transition:
+    opacity 0.43s cubic-bezier(.56,1.18,.52,.91),
+    transform 0.27s cubic-bezier(.56,1.2,.52,.91);
+  will-change: opacity,transform;
+}
+.book-card:hover .book-card-overlay,
+.book-card:focus-within .book-card-overlay {
+  opacity: 0.93;
+}
+.book-card:hover .book-card-content,
+.book-card:focus-within .book-card-content {
+  opacity: 0.99;
+  transform: scale(1.017) translateY(-3.5px);
+}
+.book-card:hover, .book-card:focus-within {
+  box-shadow: 0 13px 32px 0 rgba(251,191,36,0.18), 0 3.5px 16px rgba(99,102,241,0.13), 0 0.5px 6px 0 rgba(232,122,65,0.06);
+  border-color: var(--accent-color);
+  background: rgba(251,191,36,0.04);
+  z-index: 4;
+  outline: 2px solid var(--secondary-color);
+}
+
+.book-card:active {
+  transform: scale(0.985) translateY(1.5px);
+  outline: 2px solid var(--accent-color);
 }
 
 .book-cover-wrapper {
@@ -303,7 +385,23 @@ body, .App {
 .book-card:focus-within {
   border-color: var(--secondary-color);
   box-shadow: 0 8px 28px 0 rgba(99,102,241,0.17);
+  outline: 2.5px solid var(--accent-color);
+  outline-offset: 0.5px;
 }
+
+.genre-summary-row > svg {
+  flex-shrink: 0;
+  font-size: 37px;
+  width: 2.5em;
+  height: 2.5em;
+  filter: drop-shadow(0 3.5px 8px rgba(99,102,241,0.13));
+  pointer-events: none;
+}
+
+.genre-summary-row > div {
+  flex: 1;
+}
+
 
 .book-preview-link:focus {
   outline: 2px solid var(--accent-color);

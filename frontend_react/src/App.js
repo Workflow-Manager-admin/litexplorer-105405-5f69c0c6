@@ -1,8 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
+
+// Simple genre icon SVGs for demonstration
+const GENRE_ICONS = {
+  "Science Fiction": (
+    <svg width="31" height="31" aria-label="sci-fi" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 31 31" fill="none"><circle cx="15.5" cy="15.5" r="13.5" fill="#6366f1" opacity="0.13"/><ellipse cx="15.5" cy="19" rx="7.5" ry="2.5" fill="#E87A41" opacity="0.3"/><ellipse cx="15.5" cy="14.7" rx="8.6" ry="3.2" fill="#6366f1" opacity="0.17"/><circle cx="15.5" cy="13" r="4.5" fill="#6366f1" /></svg>
+  ),
+  "Fantasy": (
+    <svg width="29" height="29" aria-label="fantasy" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 29 29" fill="none"><ellipse cx="14.5" cy="14.5" rx="13" ry="8.5" fill="#fbbf24" opacity="0.18"/><path d="M14.5 3L17 10H12L14.5 3ZM14.5 26L12 19H17L14.5 26Z" fill="#6366f1" opacity="0.45"/><ellipse cx="14.5" cy="15" rx="5.5" ry="5" fill="#E87A41" opacity="0.26"/></svg>
+  ),
+  "Mystery": (
+    <svg width="29" height="29" aria-label="mystery" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 29 29" fill="none"><ellipse cx="14.5" cy="14.5" rx="13.5" ry="13.5" fill="#374151" opacity="0.11"/><ellipse cx="14.5" cy="22" rx="6" ry="1.7" fill="#6366f1" opacity="0.13"/><path d="M14.5 8.8a3.7 3.7 0 11-1.1 7.3c-.1-.5.3-1 .8-1.2 1.1-.5 2.2-2.2 1.1-3.2-1.1-.9-3-.1-2.4 1.5" stroke="#6366f1" strokeWidth="1.5" opacity="0.54"/><circle cx="14.5" cy="20" r="1.1" fill="#E87A41"/></svg>
+  ),
+  "Nonfiction": (
+    <svg width="29" height="29" aria-label="nonfiction" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 29 29" fill="none"><rect x="3" y="4" width="19" height="21" rx="2.6" fill="#E87A41" opacity="0.14"/><rect x="7" y="4" width="15" height="21" rx="2.6" fill="#6366f1" opacity="0.13"/><rect x="8.9" y="8" width="6.2" height="1.1" rx="0.5" fill="#6366f1" opacity="0.22"/><rect x="8.9" y="11.1" width="9.1" height="1.1" rx="0.5" fill="#6366f1" opacity="0.12"/></svg>
+  ),
+};
 
 // PUBLIC_INTERFACE
 function App() {
+  // For parallax effect
+  const bgRef = useRef(null);
+
   // Genre and books mock data
   const genres = [
     {
@@ -210,9 +229,31 @@ function App() {
     g.name.toLowerCase().includes(genreQuery.toLowerCase())
   );
 
+  // Handle hero parallax effect on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (bgRef.current) {
+        // Parallax: move slower than scroll position
+        const scrollY = window.scrollY;
+        // Clamp to not drag too much when scroll is low/high
+        const y = Math.min(scrollY * 0.38, 120);
+        bgRef.current.style.transform = `translateY(${y}px) scale(1.08)`;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   // PUBLIC_INTERFACE
   return (
-    <div className="App" style={{ minHeight: "100vh" }}>
+    <div className="App" style={{ minHeight: "100vh", position: "relative" }}>
+      {/* Parallax Movement Layer */}
+      <div
+        className="background-parallax"
+        aria-hidden="true"
+        ref={bgRef}
+      ></div>
+
       <header className="explorer-header">
         <h1 className="app-title">
           <span style={{ color: "var(--accent-color)" }}>Genre</span> Explorer
@@ -255,8 +296,13 @@ function App() {
           </div>
         </section>
         <section className="genre-summary-section" aria-label="Genre Summary">
-          <h2 className="genre-title">{genre.name}</h2>
-          <p className="genre-description">{genre.summary}</p>
+          <div className="genre-summary-row">
+            {GENRE_ICONS[genre.name]}
+            <div>
+              <h2 className="genre-title">{genre.name}</h2>
+              <p className="genre-description">{genre.summary}</p>
+            </div>
+          </div>
         </section>
 
         <section className="books-grid-section" aria-label="Books">
@@ -266,29 +312,46 @@ function App() {
           </h3>
           <div className="books-grid">
             {bookList.map((book, idx) => (
-              <div className="book-card" key={idx}>
-                <div className="book-cover-wrapper">
-                  <img
-                    src={book.image}
-                    alt={`Cover of ${book.title}`}
-                    className="book-cover"
-                  />
-                </div>
-                <div className="book-info">
-                  <div className="book-meta">
-                    <h4 className="book-title">{book.title}</h4>
-                    <span className="book-author">{book.author}</span>
+              <div className="book-card" tabIndex="0" key={idx}>
+                {/* Glassmorphism overlay with genre tint */}
+                <div
+                  className="book-card-overlay"
+                  aria-hidden="true"
+                  style={{
+                    background:
+                      genre.name === "Science Fiction"
+                        ? "linear-gradient(120deg,rgba(99,102,241,0.31) 38%,rgba(251,191,36,0.13) 80%,rgba(232,122,65,0.12) 100%)"
+                        : genre.name === "Fantasy"
+                        ? "linear-gradient(120deg,rgba(251,191,36,0.19),rgba(99,102,241,0.13) 75%,rgba(255,255,255,0.16) 100%)"
+                        : genre.name === "Mystery"
+                        ? "linear-gradient(120deg,rgba(99,102,241,.20),rgba(232,122,65,.13) 42%,rgba(55,65,81,0.13) 100%)"
+                        : "linear-gradient(110deg,rgba(232,122,65,0.12) 20%,rgba(99,102,241,0.08) 100%)",
+                  }}
+                ></div>
+                <div className="book-card-content">
+                  <div className="book-cover-wrapper">
+                    <img
+                      src={book.image}
+                      alt={`Cover of ${book.title}`}
+                      className="book-cover"
+                    />
                   </div>
-                  <p className="book-description">{book.description}</p>
-                  <a
-                    className="book-preview-link"
-                    href={book.preview}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Preview ${book.title}`}
-                  >
-                    Preview&nbsp;↗
-                  </a>
+                  <div className="book-info">
+                    <div className="book-meta">
+                      <h4 className="book-title">{book.title}</h4>
+                      <span className="book-author">{book.author}</span>
+                    </div>
+                    <p className="book-description">{book.description}</p>
+                    <a
+                      className="book-preview-link"
+                      href={book.preview}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Preview ${book.title}`}
+                    >
+                      Preview&nbsp;↗
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}
