@@ -49,16 +49,14 @@ const GENRE_EMOJIS = {
 };
 
 /**
- * Generate a mock rating and popularity for demonstration (normally from API).
- * - Returns {rating: float (1-5), popularity: float (0-1)}.
+ * Generate a mock rating and popularity when not provided.
  */
-function getBookVisuals(book, idx) {
-  // Mock by hash of title for demo
-  const hash = Array.from(book.title).reduce((a, c) => a + c.charCodeAt(0), 0) + idx * 17;
-  // Rating: 3.2–5.0 (rounded to 1 decimal)
-  const rating = Math.round((3.2 + (hash % 18) * 0.1) * 10) / 10;
-  // Popularity (0-1 for badge/flare)
-  const popularity = ((hash * 31) % 100) / 100;
+function getBookVisuals(book, idx = 0) {
+  // Try to use Google Books rating/popularity fields if available
+  let rating = book.averageRating || book.rating || 4.0 + (idx % 11) / 10;
+  let popularity = book.popularity !== undefined
+    ? Math.min(1, book.popularity)
+    : ((idx % 4) + 1) / 5;
   return { rating, popularity };
 }
 
@@ -139,212 +137,136 @@ function App() {
   // Animation mode: 'subtle' or 'lively'
   const [animationMode, setAnimationMode] = useState("subtle");
 
-  // Genre and books mock data
+  // List of genres, each with a Wikipedia-friendly search string.
   const genres = [
-    {
-      name: "Science Fiction",
-      summary:
-        "Science Fiction is a genre that explores speculative concepts such as futuristic science and technology, space exploration, time travel, and extraterrestrial life.",
-    },
-    {
-      name: "Fantasy",
-      summary:
-        "Fantasy literature features magical elements, mythological creatures, and fantastical worlds that are not bound by the laws of nature.",
-    },
-    {
-      name: "Mystery",
-      summary:
-        "Mystery novels center around solving a crime or unraveling secrets, often featuring detectives or amateur sleuths.",
-    },
-    {
-      name: "Nonfiction",
-      summary:
-        "Nonfiction books are grounded in fact, providing information, education, or personal experience across a variety of subjects.",
-    },
+    { name: "Science Fiction", wiki: "Science_fiction" },
+    { name: "Fantasy", wiki: "Fantasy" },
+    { name: "Mystery", wiki: "Mystery_fiction" },
+    { name: "Nonfiction", wiki: "Non-fiction" },
   ];
-
-  const MOCK_BOOKS = {
-    "Science Fiction": [
-      {
-        title: "Dune",
-        author: "Frank Herbert",
-        description:
-          "Set on the desert planet Arrakis, Dune is the story of Paul Atreides and the conflict for control of the spice melange.",
-        image:
-          "https://covers.openlibrary.org/b/id/9996671-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/Dune/9Bq9DwAAQBAJ",
-      },
-      {
-        title: "Neuromancer",
-        author: "William Gibson",
-        description:
-          "A classic cyberpunk novel about a washed-up computer hacker hired for one last job in a dystopian future.",
-        image:
-          "https://covers.openlibrary.org/b/id/8228691-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/Neuromancer/O9lZAAAAMAAJ",
-      },
-      {
-        title: "Kindred",
-        author: "Octavia E. Butler",
-        description:
-          "A time-travel story exploring slavery in 19th-century America through the eyes of a contemporary Black woman.",
-        image:
-          "https://covers.openlibrary.org/b/id/10909282-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/Kindred/_jNGEAAAQBAJ",
-      },
-      {
-        title: "Foundation",
-        author: "Isaac Asimov",
-        description:
-          "A galactic saga following the rise and fall of civilizations, and the mathematicians predicting their future.",
-        image:
-          "https://covers.openlibrary.org/b/id/8374146-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/Foundation/XMCm6VUEEEkC",
-      },
-    ],
-    Fantasy: [
-      {
-        title: "The Hobbit",
-        author: "J.R.R. Tolkien",
-        description:
-          "A classic tale of a hobbit, a wizard, and a group of dwarves on an adventure to reclaim a lost kingdom.",
-        image:
-          "https://covers.openlibrary.org/b/id/6979861-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/The_Hobbit/1JJtDwAAQBAJ",
-      },
-      {
-        title: "A Game of Thrones",
-        author: "George R.R. Martin",
-        description:
-          "The first book in the epic fantasy saga 'A Song of Ice and Fire', exploring politics, power, and dragons.",
-        image:
-          "https://covers.openlibrary.org/b/id/5541062-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/A_Game_of_Thrones/7F1PAwAAQBAJ",
-      },
-      {
-        title: "The Name of the Wind",
-        author: "Patrick Rothfuss",
-        description:
-          "Kvothe relates his journey from young prodigy to the most legendary figure in the world.",
-        image:
-          "https://covers.openlibrary.org/b/id/7559256-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/The_Name_of_the_Wind/4Xi4vV9nZl0C",
-      },
-      {
-        title: "Mistborn",
-        author: "Brandon Sanderson",
-        description:
-          "In a world where ash falls from the sky, a street thief discovers her powers and the possibility of overthrowing a tyrant.",
-        image:
-          "https://covers.openlibrary.org/b/id/8595652-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/Mistborn/8P5aAAAAMAAJ",
-      },
-    ],
-    Mystery: [
-      {
-        title: "The Girl with the Dragon Tattoo",
-        author: "Stieg Larsson",
-        description:
-          "A journalist and a hacker team up to solve a decades-old disappearance in Sweden.",
-        image:
-          "https://covers.openlibrary.org/b/id/9260157-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/The_Girl_with_the_Dragon_Tattoo/nlKnL5ZRsQ0C",
-      },
-      {
-        title: "Gone Girl",
-        author: "Gillian Flynn",
-        description:
-          "A twisted psychological thriller about a woman who vanishes on her wedding anniversary.",
-        image:
-          "https://covers.openlibrary.org/b/id/8188691-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/Gone_Girl/5T3_zQEACAAJ",
-      },
-      {
-        title: "And Then There Were None",
-        author: "Agatha Christie",
-        description:
-          "Ten strangers are invited to an island, only to be accused of murder and confronted with their secrets.",
-        image:
-          "https://covers.openlibrary.org/b/id/8291891-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/And_Then_There_Were_None/uSy84FCB_K4C",
-      },
-      {
-        title: "In the Woods",
-        author: "Tana French",
-        description:
-          "A detective investigates a girl's murder that may be tied to his own past.",
-        image:
-          "https://covers.openlibrary.org/b/id/8225231-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/In_the_Woods/W8w1nQMxyE8C",
-      },
-    ],
-    Nonfiction: [
-      {
-        title: "Sapiens: A Brief History of Humankind",
-        author: "Yuval Noah Harari",
-        description:
-          "A sweeping narrative exploring how Homo sapiens became Earth’s dominant species.",
-        image:
-          "https://covers.openlibrary.org/b/id/8225631-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/Sapiens/jd0SDQAAQBAJ",
-      },
-      {
-        title: "Educated",
-        author: "Tara Westover",
-        description:
-          "A memoir about a woman who, kept out of school by her survivalist family, strives for knowledge and escapes into academia.",
-        image:
-          "https://covers.openlibrary.org/b/id/9250881-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/Educated/3WhDDwAAQBAJ",
-      },
-      {
-        title: "The Immortal Life of Henrietta Lacks",
-        author: "Rebecca Skloot",
-        description:
-          "The story of the woman whose cells transformed medical research.",
-        image:
-          "https://covers.openlibrary.org/b/id/8091010-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/The_Immortal_Life_of_Henrietta_Lacks/w2vZTDPHqmQC",
-      },
-      {
-        title: "Thinking, Fast and Slow",
-        author: "Daniel Kahneman",
-        description:
-          "An exploration of the two systems that drive the way we think and make choices.",
-        image:
-          "https://covers.openlibrary.org/b/id/7934751-L.jpg",
-        preview:
-          "https://www.google.com/books/edition/Thinking_Fast_and_Slow/frnBAAAQBAJ",
-      },
-    ],
-  };
 
   const [selectedGenre, setSelectedGenre] = useState(genres[0].name);
   const [genreQuery, setGenreQuery] = useState("");
+  const [genreSummary, setGenreSummary] = useState("");
+  const [genreSummaryStatus, setGenreSummaryStatus] = useState("idle"); // "idle", "loading", "error", "done"
+  const [books, setBooks] = useState([]);
+  const [booksStatus, setBooksStatus] = useState("idle");  // "idle", "loading", "error", "done"
+  const [booksErrorMsg, setBooksErrorMsg] = useState("");
+  const [summaryErrorMsg, setSummaryErrorMsg] = useState("");
 
-  const genre = genres.find((g) => g.name === selectedGenre);
-
-  const bookList = MOCK_BOOKS[selectedGenre];
+  // Utility: find genre object from name
+  const genreObj = genres.find((g) => g.name === selectedGenre);
 
   // For minimal search/filter effect in dropdown
   const filteredGenres = genres.filter((g) =>
     g.name.toLowerCase().includes(genreQuery.toLowerCase())
   );
+
+  // --- Fetch genre summary from Wikipedia ---
+  useEffect(() => {
+    let aborted = false;
+    async function fetchSummary() {
+      setGenreSummaryStatus("loading");
+      setSummaryErrorMsg("");
+      try {
+        // Use Wikipedia REST summary API for best-guess/short summary.
+        const resp = await fetch(
+          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(genreObj.wiki)}`
+        );
+        if (!resp.ok) throw new Error(`Wikipedia API error (${resp.status})`);
+        const data = await resp.json();
+        // Wikipedia API: get extract (short summary), fallback to first 350 chars of description.
+        let summary = data.extract || (data.description ? data.description.substring(0, 350) : "");
+        if (!summary && data.type === "disambiguation" && Array.isArray(data.titles)) {
+          summary = "No summary available. (Disambiguation page)";
+        }
+        if (!summary) {
+          throw new Error("Wikipedia summary not found.");
+        }
+        if (!aborted) {
+          setGenreSummary(summary);
+          setGenreSummaryStatus("done");
+        }
+      } catch (err) {
+        if (!aborted) {
+          setGenreSummaryStatus("error");
+          setSummaryErrorMsg(err.message || "Failed to load summary.");
+          setGenreSummary("");
+        }
+      }
+    }
+    fetchSummary();
+    return () => { aborted = true; };
+    // genreObj.wiki update triggers fetch
+  }, [genreObj.wiki]);
+
+  // --- Fetch book data from Google Books API (filter by genre/topic) ---
+  useEffect(() => {
+    let aborted = false;
+    async function fetchBooks() {
+      setBooksStatus("loading");
+      setBooksErrorMsg("");
+      setBooks([]);
+      // Use a mapping for good genre queries
+      const genreQueryMap = {
+        "Science Fiction": "science fiction",
+        "Fantasy": "fantasy",
+        "Mystery": "mystery",
+        "Nonfiction": "nonfiction",
+      };
+      const subject = genreQueryMap[genreObj.name] || genreObj.name;
+      // Build the query for bestbooks by subject: uses 'subject' and ordered by relevance
+      const baseURL = "https://www.googleapis.com/books/v1/volumes";
+      // Show only print books, relevance ordering, limit to 8.
+      const params = `?q=subject:${encodeURIComponent(subject)}&maxResults=8&printType=books&orderBy=relevance&langRestrict=en`;
+      try {
+        const resp = await fetch(baseURL + params);
+        if (!resp.ok) throw new Error(`Google Books API error (${resp.status})`);
+        const data = await resp.json();
+        if (!data.items || !Array.isArray(data.items)) throw new Error("No books found.");
+        // Map to our structure, provide fallbacks for missing images/authors/descriptions.
+        const parsedBooks = data.items.map((item) => {
+          const info = item.volumeInfo || {};
+          return {
+            title: info.title || "Untitled Book",
+            author: (info.authors && info.authors[0]) || "Unknown Author",
+            description: info.description
+              ? info.description.length > 320
+                ? info.description.substring(0, 300) + "…"
+                : info.description
+              : "No description available.",
+            image:
+              (info.imageLinks && (info.imageLinks.large || info.imageLinks.thumbnail || info.imageLinks.smallThumbnail)) ||
+              "https://via.placeholder.com/132x178.png?text=No+Cover",
+            preview:
+              info.previewLink ||
+              info.infoLink ||
+              "https://books.google.com/",
+
+            // API-provided fields for visuals:
+            averageRating: info.averageRating || null,
+            // Not a real API popularity field but randomize for visual accent
+            popularity: info.ratingsCount
+              ? Math.min(1, (info.ratingsCount / 4000) + Math.random() * 0.2)
+              : Math.random() * 0.5,
+          };
+        });
+        if (!aborted) {
+          setBooks(parsedBooks);
+          setBooksStatus("done");
+        }
+      } catch (err) {
+        if (!aborted) {
+          setBooksErrorMsg(err.message || "Failed to load books.");
+          setBooks([]);
+          setBooksStatus("error");
+        }
+      }
+    }
+    fetchBooks();
+    return () => { aborted = true; };
+    // genreObj update triggers books fetch
+  }, [genreObj.name]);
 
   // Handle hero parallax effect on scroll
   useEffect(() => {
@@ -360,6 +282,7 @@ function App() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   // PUBLIC_INTERFACE
   return (
     <div className="App" style={{ minHeight: "100vh", position: "relative" }}>
@@ -445,10 +368,18 @@ function App() {
         </section>
         <section className="genre-summary-section" aria-label="Genre Summary">
           <div className="genre-summary-row">
-            {GENRE_ICONS[genre.name]}
+            {GENRE_ICONS[genreObj.name]}
             <div>
-              <h2 className="genre-title">{genre.name}</h2>
-              <p className="genre-description">{genre.summary}</p>
+              <h2 className="genre-title">{genreObj.name}</h2>
+              {genreSummaryStatus === "loading" && (
+                <p className="genre-description" style={{color:'var(--text-dim)'}}>Loading summary…</p>
+              )}
+              {genreSummaryStatus === "error" && (
+                <p className="genre-description" style={{color:"#e53935"}}>Failed to load genre overview. {summaryErrorMsg ? (<span style={{ fontWeight: 500 }}>{summaryErrorMsg}</span>) : null}</p>
+              )}
+              {genreSummaryStatus === "done" && (
+                <p className="genre-description">{genreSummary}</p>
+              )}
             </div>
           </div>
         </section>
@@ -456,10 +387,21 @@ function App() {
         <section className="books-grid-section" aria-label="Books">
           <h3 className="books-title">
             Influential &amp; Popular Books in{" "}
-            <span style={{ color: "var(--accent-color)" }}>{genre.name}</span>
+            <span style={{ color: "var(--accent-color)" }}>{genreObj.name}</span>
           </h3>
+          {booksStatus === "loading" && (
+            <div style={{color:'var(--text-dim)',padding:'0.9em 0'}}>Loading books…</div>
+          )}
+          {booksStatus === "error" && (
+            <div style={{color:'#e53935', fontWeight: 500, padding:'0.9em 0'}} aria-live="polite">
+              {booksErrorMsg ? `Failed to load books: ${booksErrorMsg}` : "Error loading books."}
+            </div>
+          )}
+          {booksStatus === "done" && books.length === 0 && (
+            <div style={{color:'var(--text-dim)', padding:'0.9em 0'}}>No books found for this genre.</div>
+          )}
           <div className="books-grid">
-            {bookList.map((book, idx) => {
+            {booksStatus === "done" && books.map((book, idx) => {
               // Determine the card's animation
               const livelyAnim = pickLivelyAnimation(idx);
               const subtleAnim = pickSubtleAnimation(idx);
@@ -470,8 +412,8 @@ function App() {
 
               // Get genre icon/emoji for this card
               const cardIcon =
-                GENRE_ICONS[genre.name] ||
-                <span style={{ fontSize: "2em", marginRight: 8 }}>{GENRE_EMOJIS[genre.name] || "📚"}</span>;
+                GENRE_ICONS[genreObj.name] ||
+                <span style={{ fontSize: "2em", marginRight: 8 }}>{GENRE_EMOJIS[genreObj.name] || "📚"}</span>;
 
               // Get visual indicators
               const { rating, popularity } = getBookVisuals(book, idx);
@@ -488,11 +430,11 @@ function App() {
                     aria-hidden="true"
                     style={{
                       background:
-                        genre.name === "Science Fiction"
+                        genreObj.name === "Science Fiction"
                           ? "linear-gradient(120deg,rgba(99,102,241,0.31) 38%,rgba(251,191,36,0.13) 80%,rgba(232,122,65,0.12) 100%)"
-                          : genre.name === "Fantasy"
+                          : genreObj.name === "Fantasy"
                           ? "linear-gradient(120deg,rgba(251,191,36,0.19),rgba(99,102,241,0.13) 75%,rgba(255,255,255,0.16) 100%)"
-                          : genre.name === "Mystery"
+                          : genreObj.name === "Mystery"
                           ? "linear-gradient(120deg,rgba(99,102,241,.20),rgba(232,122,65,.13) 42%,rgba(55,65,81,0.13) 100%)"
                           : "linear-gradient(110deg,rgba(232,122,65,0.12) 20%,rgba(99,102,241,0.08) 100%)",
                     }}
@@ -503,6 +445,8 @@ function App() {
                         src={book.image}
                         alt={`Cover of ${book.title}`}
                         className="book-cover"
+                        loading="lazy"
+                        style={{ background: "#fafcff", border: "1px solid #ececec" }}
                       />
                       {/* Card Genre Icon */}
                       <div
@@ -522,11 +466,11 @@ function App() {
                           alignItems: "center",
                           justifyContent: "center"
                         }}
-                        title={`${genre.name} genre`}
+                        title={`${genreObj.name} genre`}
                       >
-                        {GENRE_ICONS[genre.name]
-                          ? <span style={{ width:"1.6em",height:"1.6em",display:"flex",alignItems:"center",justifyContent:"center" }}>{GENRE_ICONS[genre.name]}</span>
-                          : <span role="img" aria-label={genre.name + " icon"} style={{fontSize:"1.6em"}}>{GENRE_EMOJIS[genre.name]}</span>
+                        {GENRE_ICONS[genreObj.name]
+                          ? <span style={{ width:"1.6em",height:"1.6em",display:"flex",alignItems:"center",justifyContent:"center" }}>{GENRE_ICONS[genreObj.name]}</span>
+                          : <span role="img" aria-label={genreObj.name + " icon"} style={{fontSize:"1.6em"}}>{GENRE_EMOJIS[genreObj.name]}</span>
                         }
                       </div>
                       {/* Rating/Popularity badge at corner */}
