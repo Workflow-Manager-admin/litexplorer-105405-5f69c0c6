@@ -269,6 +269,215 @@ body, .App {
   outline: 2px solid var(--accent-color);
 }
 
+/* ======================== */
+/* Animation Toggle Button  */
+/* ======================== */
+.anim-toggle-btn {
+  box-shadow: 0 2px 12px rgba(99,102,241,0.03);
+}
+.anim-toggle-btn.active {
+  filter: drop-shadow(0 3.5px 10px rgba(99,102,241,0.15));
+}
+
+/* ======================== */
+/* Subtle Book Card Effects */
+/* ======================== */
+/* Subtle: Fade In */
+.book-card.book-card-subtle.book-subtle-fade {
+  opacity: 0;
+  transform: scale(0.97) translateY(22px);
+  animation: subtle-fadein 0.8s cubic-bezier(.52,1.29,.39,1.01) both;
+  animation-delay: 0.08s;
+}
+@keyframes subtle-fadein {
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0px);
+  }
+}
+
+/* Subtle: Scale Up */
+.book-card.book-card-subtle.book-subtle-scale {
+  opacity: 0;
+  transform: scale(0.90) rotateZ(-3deg);
+  animation: subtle-scalein 0.77s cubic-bezier(.54,1.19,.2,.99) both;
+  animation-delay: 0.11s;
+}
+@keyframes subtle-scalein {
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateZ(0deg);
+  }
+}
+
+/* Subtle: Slide In (from bottom) */
+.book-card.book-card-subtle.book-subtle-slide {
+  opacity: 0;
+  transform: translateY(34px) scale(0.98);
+  animation: subtle-slidein 0.72s cubic-bezier(.51,1.22,.32,.98) both;
+  animation-delay: 0.14s;
+}
+@keyframes subtle-slidein {
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+/* ========================= */
+/* Lively Book Card Effects  */
+/* ========================= */
+
+/* Flip Y (card, on hover & entry) */
+.book-card.book-card-lively.book-flipY {
+  transform-style: preserve-3d;
+  perspective: 800px;
+  animation: lively-entry-flipY 0.86s cubic-bezier(.51,1.39,.23,0.96) both;
+}
+@keyframes lively-entry-flipY {
+  0% {
+    opacity: 0.12;
+    transform: rotateY(91deg) scale(0.93);
+  }
+  80% {
+    opacity: 1;
+    transform: rotateY(-8deg) scale(1.013);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateY(0deg) scale(1);
+  }
+}
+.book-card-lively.book-flipY:hover,
+.book-card-lively.book-flipY:focus-within {
+  animation: lively-hover-flipY 0.65s cubic-bezier(.51,1.39,.23,0.96);
+}
+@keyframes lively-hover-flipY {
+  0% { transform: rotateY(0deg);}
+  50% {transform: rotateY(14deg) scale(1.032);}
+  100% {transform: rotateY(0deg);}
+}
+
+/* Flip X (card, on hover & entry) */
+.book-card.book-card-lively.book-flipX {
+  transform-style: preserve-3d;
+  perspective: 700px;
+  animation: lively-entry-flipX 0.81s cubic-bezier(.41,1.35,.21,1.0) both;
+}
+@keyframes lively-entry-flipX {
+  0% {
+    opacity: 0.10;
+    transform: rotateX(89deg) scale(0.93);
+  }
+  75% {
+    opacity: 1;
+    transform: rotateX(-8deg) scale(1.017);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateX(0deg) scale(1);
+  }
+}
+.book-card-lively.book-flipX:hover,
+.book-card-lively.book-flipX:focus-within {
+  animation: lively-hover-flipX 0.54s cubic-bezier(.41,1.24,.24,1.06);
+}
+@keyframes lively-hover-flipX {
+  0% { transform: rotateX(0deg);}
+  55% { transform: rotateX(14deg) scale(1.025);}
+  100% { transform: rotateX(0deg);}
+}
+
+/* Bounce */
+.book-card.book-card-lively.book-bounce {
+  animation: lively-bouncein 0.83s cubic-bezier(.52,1.29,.31,.95) both;
+}
+@keyframes lively-bouncein {
+  0% {
+    opacity: 0.13;
+    transform: translateY(34px) scale(0.95);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-22px) scale(1.06);
+  }
+  84% {
+    transform: translateY(7px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.book-card-lively.book-bounce:hover,
+.book-card-lively.book-bounce:focus-within {
+  animation: lively-hover-bounce 0.52s cubic-bezier(.54,1.67,.12,1.01);
+}
+@keyframes lively-hover-bounce {
+  0% { transform: translateY(0);}
+  45% { transform: translateY(-17px) scale(1.02);}
+  100% { transform: translateY(0);}
+}
+
+/* Slide (from left) */
+.book-card.book-card-lively.book-slide {
+  opacity: 0;
+  transform: translateX(-80px) scale(0.98);
+  animation: lively-slidein 0.78s cubic-bezier(.45,1.09,.41,0.93) both;
+}
+@keyframes lively-slidein {
+  100% {
+    opacity: 1;
+    transform: translateX(0px) scale(1);
+  }
+}
+.book-card-lively.book-slide:hover,
+.book-card-lively.book-slide:focus-within {
+  animation: lively-hover-slide 0.47s cubic-bezier(.64,1.29,.15,0.97);
+}
+@keyframes lively-hover-slide {
+  0% { transform: translateX(0);}
+  28% { transform: translateX(-13px) scale(1.021);}
+  100% { transform: translateX(0);}
+}
+
+/* 3D Rotate (Z-axis) */
+.book-card.book-card-lively.book-rotate3D {
+  transform-style: preserve-3d;
+  perspective: 650px;
+  animation: lively-entry-rotate3D 0.91s cubic-bezier(.41,1.53,.16,0.92) both;
+}
+@keyframes lively-entry-rotate3D {
+  0% {
+    opacity: 0.13;
+    transform: rotateZ(-70deg) scale(0.89);
+  }
+  85% {
+    opacity: 1;
+    transform: rotateZ(13deg) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateZ(0deg) scale(1);
+  }
+}
+.book-card-lively.book-rotate3D:hover,
+.book-card-lively.book-rotate3D:focus-within {
+  animation: lively-hover-rotate3D 0.59s cubic-bezier(.64,1.2,.41,0.98);
+}
+@keyframes lively-hover-rotate3D {
+  0% { transform: rotateZ(0deg);}
+  56% { transform: rotateZ(-14deg) scale(1.017);}
+  100% { transform: rotateZ(0deg);}
+}
+
+/* ================================ */
+/* Ensure grid doesn't break effects */
+/* ================================ */
+.books-grid > .book-card-anim {
+  will-change: transform, opacity;
+}
+
 .book-cover-wrapper {
   width: 100%;
   padding-bottom: 138px;

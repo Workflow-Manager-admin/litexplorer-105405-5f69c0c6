@@ -1,6 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
 
+// Utility: pseudo-random deterministic animation assignment per card on each render
+function pickLivelyAnimation(idx) {
+  const options = ['flipY', 'flipX', 'bounce', 'slide', 'rotate3D'];
+  // Use mod so the animation selection stays consistent per card
+  return options[idx % options.length];
+}
+
+function pickSubtleAnimation(idx) {
+  // Subtle: fade, scale, light slide
+  const options = ['subtle-fade', 'subtle-scale', 'subtle-slide'];
+  return options[idx % options.length];
+}
+
 // Simple genre icon SVGs for demonstration
 const GENRE_ICONS = {
   "Science Fiction": (
@@ -21,6 +34,9 @@ const GENRE_ICONS = {
 function App() {
   // For parallax effect
   const bgRef = useRef(null);
+
+  // Animation mode: 'subtle' or 'lively'
+  const [animationMode, setAnimationMode] = useState("subtle");
 
   // Genre and books mock data
   const genres = [
@@ -243,7 +259,6 @@ function App() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   // PUBLIC_INTERFACE
   return (
     <div className="App" style={{ minHeight: "100vh", position: "relative" }}>
@@ -261,6 +276,38 @@ function App() {
         <p className="subtitle">
           Discover popular books and summaries for your favorite literary genres.
         </p>
+        <div style={{
+            marginTop: "1rem",
+            marginBottom: "-0.5rem",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "0.8rem",
+            fontSize: "1rem",
+        }}>
+          <label htmlFor="animation-mode-toggle" style={{fontWeight:600}}>Card Animation:</label>
+          <button
+            id="animation-mode-toggle"
+            className={"anim-toggle-btn " + (animationMode === "lively" ? "active" : "")}
+            aria-pressed={animationMode === 'lively'}
+            aria-label="Switch animation style"
+            onClick={() => setAnimationMode(animationMode === "subtle" ? "lively" : "subtle")}
+            style={{
+              background: animationMode === "lively" ? "var(--secondary-color)" : "var(--accent-color)",
+              color: "#fff",
+              border: "none",
+              borderRadius: "1.6em",
+              fontWeight: "bold",
+              fontSize: "1.04em",
+              padding: "0.38em 1.35em",
+              cursor: "pointer",
+              outline: animationMode === "lively" ? "2px solid var(--accent-color)" : "",
+              transition: "background 0.17s, outline 0.14s"
+            }}
+          >
+            {animationMode === "subtle" ? "Subtle" : "Lively"}
+          </button>
+        </div>
       </header>
 
       <main className="main-container">
@@ -311,50 +358,64 @@ function App() {
             <span style={{ color: "var(--accent-color)" }}>{genre.name}</span>
           </h3>
           <div className="books-grid">
-            {bookList.map((book, idx) => (
-              <div className="book-card" tabIndex="0" key={idx}>
-                {/* Glassmorphism overlay with genre tint */}
+            {bookList.map((book, idx) => {
+              // Animation assignment
+              const livelyAnim = pickLivelyAnimation(idx);
+              const subtleAnim = pickSubtleAnimation(idx);
+              const animClass =
+                animationMode === "lively"
+                  ? `book-card-anim book-card-lively book-${livelyAnim}`
+                  : `book-card-anim book-card-subtle book-${subtleAnim}`;
+
+              return (
                 <div
-                  className="book-card-overlay"
-                  aria-hidden="true"
-                  style={{
-                    background:
-                      genre.name === "Science Fiction"
-                        ? "linear-gradient(120deg,rgba(99,102,241,0.31) 38%,rgba(251,191,36,0.13) 80%,rgba(232,122,65,0.12) 100%)"
-                        : genre.name === "Fantasy"
-                        ? "linear-gradient(120deg,rgba(251,191,36,0.19),rgba(99,102,241,0.13) 75%,rgba(255,255,255,0.16) 100%)"
-                        : genre.name === "Mystery"
-                        ? "linear-gradient(120deg,rgba(99,102,241,.20),rgba(232,122,65,.13) 42%,rgba(55,65,81,0.13) 100%)"
-                        : "linear-gradient(110deg,rgba(232,122,65,0.12) 20%,rgba(99,102,241,0.08) 100%)",
-                  }}
-                ></div>
-                <div className="book-card-content">
-                  <div className="book-cover-wrapper">
-                    <img
-                      src={book.image}
-                      alt={`Cover of ${book.title}`}
-                      className="book-cover"
-                    />
-                  </div>
-                  <div className="book-info">
-                    <div className="book-meta">
-                      <h4 className="book-title">{book.title}</h4>
-                      <span className="book-author">{book.author}</span>
+                  className={`book-card ${animClass}`}
+                  tabIndex="0"
+                  key={idx}
+                >
+                  {/* Glassmorphism overlay with genre tint */}
+                  <div
+                    className="book-card-overlay"
+                    aria-hidden="true"
+                    style={{
+                      background:
+                        genre.name === "Science Fiction"
+                          ? "linear-gradient(120deg,rgba(99,102,241,0.31) 38%,rgba(251,191,36,0.13) 80%,rgba(232,122,65,0.12) 100%)"
+                          : genre.name === "Fantasy"
+                          ? "linear-gradient(120deg,rgba(251,191,36,0.19),rgba(99,102,241,0.13) 75%,rgba(255,255,255,0.16) 100%)"
+                          : genre.name === "Mystery"
+                          ? "linear-gradient(120deg,rgba(99,102,241,.20),rgba(232,122,65,.13) 42%,rgba(55,65,81,0.13) 100%)"
+                          : "linear-gradient(110deg,rgba(232,122,65,0.12) 20%,rgba(99,102,241,0.08) 100%)",
+                    }}
+                  ></div>
+                  <div className="book-card-content">
+                    <div className="book-cover-wrapper">
+                      <img
+                        src={book.image}
+                        alt={`Cover of ${book.title}`}
+                        className="book-cover"
+                      />
                     </div>
-                    <p className="book-description">{book.description}</p>
-                    <a
-                      className="book-preview-link"
-                      href={book.preview}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Preview ${book.title}`}
-                    >
-                      Preview&nbsp;↗
-                    </a>
+                    <div className="book-info">
+                      <div className="book-meta">
+                        <h4 className="book-title">{book.title}</h4>
+                        <span className="book-author">{book.author}</span>
+                      </div>
+                      <p className="book-description">{book.description}</p>
+                      <a
+                        className="book-preview-link"
+                        href={book.preview}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Preview ${book.title}`}
+                      >
+                        Preview&nbsp;↗
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       </main>
