@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
+import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import Homepage from './Homepage';
+import AddBookForm from './AddBookForm';
 
 /**
  * Icon and emoji assignments for genres
@@ -60,7 +63,6 @@ const GENRE_EMOJIS = {
   "Classic": "📜",
   "Adventure": "🗺️",
 };
-
 const GENRES = [
   { name: "Science Fiction", wiki: "Science_fiction" },
   { name: "Fantasy", wiki: "Fantasy" },
@@ -77,11 +79,9 @@ const GENRES = [
   { name: "Adventure", wiki: "Adventure_novel" },
 ];
 
-
-/**
- * PUBLIC_INTERFACE
- * GenreDropdown: Accessible, custom dropdown with search, keyboard, icons, and animation
- */
+// ==============================
+// GenreDropdown COMPONENT
+// ==============================
 function GenreDropdown({
   genres,
   selectedGenre,
@@ -111,7 +111,6 @@ function GenreDropdown({
     };
   }, [dropdownOpen]);
 
-  // Close on escape globally when open
   useEffect(() => {
     if (!dropdownOpen) return;
     function onEsc(evt) {
@@ -124,7 +123,6 @@ function GenreDropdown({
     return () => document.removeEventListener('keydown', onEsc);
   }, [dropdownOpen]);
 
-  // Keyboard navigation in list
   const filteredGenres = genres.filter(g => g.name.toLowerCase().includes(search.toLowerCase()));
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -142,7 +140,6 @@ function GenreDropdown({
       setDropdownOpen((d) => !d);
     }
   }
-
   function handleListKeyDown(e) {
     if (e.key === "ArrowDown") {
       setFocusIndex((c) => Math.min(filteredGenres.length - 1, c + 1));
@@ -162,16 +159,12 @@ function GenreDropdown({
       setDropdownOpen(false); setFocusIndex(-1);
     }
   }
-
   function handleGenreClick(idx, name) {
     setSelectedGenre(name);
     setDropdownOpen(false);
     setFocusIndex(-1);
   }
-
-  // Consistent dropdown width for both desktop/mobile
   const dropdownWidth = 'min(320px, 97vw)';
-
   return (
     <div className="genre-select-wrapper" ref={dropdownRef} style={{ position: 'relative', width: dropdownWidth, flex: 1 }}>
       <div style={{display: 'flex', alignItems: 'center', gap: 0}}>
@@ -287,7 +280,6 @@ function GenreDropdown({
               onMouseLeave={() => setFocusIndex(-1)}
               onKeyDown={e => e.key === "Enter" && handleGenreClick(idx, g.name)}
             >
-              {/* Display icon/emoji, SVG preferred */}
               {GENRE_ICONS[g.name]
                 ? <span aria-hidden="true" style={{width: "1.53em", height: "1.53em", marginRight: "0.59em", display: "flex", alignItems: "center"}}>{GENRE_ICONS[g.name]}</span>
                 : <span aria-hidden="true" style={{fontSize:"1.2em", marginRight: "0.72em"}}>{GENRE_EMOJIS[g.name] || "📚"}</span>
@@ -304,10 +296,7 @@ function GenreDropdown({
   );
 }
 
-
-/**
- * Utility cards/animations/visuals (same as before/unchanged)
- */
+// Utility
 function pickLivelyAnimation(idx) {
   const options = ['flipY', 'flipX', 'bounce', 'slide', 'rotate3D'];
   return options[idx % options.length];
@@ -383,12 +372,141 @@ function PopularityBadge({ popularity }) {
   );
 }
 
-/**
- * PUBLIC_INTERFACE
- * Main App (with enhanced custom genre dropdown)
- */
-function App() {
-  // For parallax effect
+// Main wrapper using router, exported as default
+function AppWrapper() {
+  // Router navigation
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [showAddBook, setShowAddBook] = useState(false);
+
+  // Store user-added books only in memory (for demo)
+  const [userBooks, setUserBooks] = useState([]);
+
+  // Handler for adding a book (from AddBookForm)
+  function handleAddBook(book) {
+    setUserBooks((prev) => [...prev, book]);
+    setShowAddBook(false);
+    // After add, go back to book explorer page
+    navigate('/books');
+  }
+
+  function handleCancelAddBook() {
+    setShowAddBook(false);
+    // Just go back if on add book route
+    if (location.pathname !== '/books') navigate('/books');
+  }
+
+  function NavigationBar() {
+    return (
+      <nav
+        style={{
+          width: '100%',
+          maxWidth: 1200,
+          margin: '0 auto',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          gap: '1.2em',
+          padding: '0.5em 1.5em',
+          position: 'relative',
+          zIndex: 22,
+        }}>
+        <Link
+          to="/"
+          style={{
+            color: location.pathname === '/' ? 'var(--accent-color,#fbbf24)' : 'var(--primary-color,#374151)',
+            fontWeight: 700,
+            textDecoration: 'none',
+            fontSize: '1.03em',
+            marginRight: 'auto',
+            letterSpacing: '-0.02em',
+            opacity: 0.98
+          }}>
+          Home
+        </Link>
+        <Link
+          to="/books"
+          style={{
+            color: location.pathname.startsWith('/books') ? 'var(--secondary-color,#6366f1)' : '#444',
+            fontWeight: 700,
+            textDecoration: 'none',
+            fontSize: '1.03em',
+            letterSpacing: '-0.02em'
+          }}>
+          Book Explorer
+        </Link>
+        {location.pathname === '/books' && (
+          <button
+            onClick={() => setShowAddBook(true)}
+            className="btn"
+            style={{
+              background: 'var(--accent-color,#fbbf24)',
+              color: '#1A1A1A',
+              border: 'none',
+              borderRadius: '1.5em',
+              fontWeight: 'bold',
+              fontSize: '1em',
+              padding: '0.48em 1.5em',
+              marginLeft: '1em',
+              cursor: 'pointer',
+              boxShadow: '0 1.5px 6px 0 rgba(251,191,36,0.13)',
+              transition: 'background 0.16s'
+            }}
+          >+ Add Book</button>
+        )}
+      </nav>
+    );
+  }
+
+  return (
+    <>
+      <NavigationBar />
+      <Routes>
+        {/* Homepage Route */}
+        <Route
+          path="/"
+          element={
+            <Homepage onNavigateBooks={() => navigate('/books')} />
+          }
+        />
+        {/* Add Book Route */}
+        <Route
+          path="/books/new"
+          element={
+            <AddBookForm genres={GENRES} onAddBook={handleAddBook} onCancel={handleCancelAddBook} />
+          }
+        />
+        {/* Main Book Explorer Route */}
+        <Route
+          path="/books"
+          element={
+            <BookExplorer
+              userBooks={userBooks}
+              onAddNewBookClick={() => setShowAddBook(true)}
+            />
+          }
+        />
+      </Routes>
+      {showAddBook && (
+        <div
+          style={{
+            position: 'fixed',
+            left: 0, top: 0, width: '100vw', height: '100vh',
+            background: 'rgba(55,65,81,0.20)',
+            zIndex: 55,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+          <AddBookForm genres={GENRES} onAddBook={handleAddBook} onCancel={handleCancelAddBook} />
+        </div>
+      )}
+    </>
+  );
+}
+
+// Book Explorer as sub-component (NOT default export)
+function BookExplorer({ userBooks, onAddNewBookClick }) {
   const bgRef = useRef(null);
   const [animationMode, setAnimationMode] = useState("subtle");
   const [selectedGenre, setSelectedGenre] = useState(GENRES[0].name);
@@ -399,10 +517,8 @@ function App() {
   const [booksStatus, setBooksStatus] = useState("idle");
   const [booksErrorMsg, setBooksErrorMsg] = useState("");
 
-  // Util: genre object for details
   const genreObj = GENRES.find(g => g.name === selectedGenre) || GENRES[0];
 
-  // Wikipedia summary for genre
   useEffect(() => {
     let aborted = false;
     async function fetchSummary() {
@@ -435,7 +551,6 @@ function App() {
     return () => { aborted = true; };
   }, [genreObj.wiki]);
 
-  // Fetch books from Google Books
   useEffect(() => {
     let aborted = false;
     async function fetchBooks() {
@@ -486,6 +601,7 @@ function App() {
             popularity: info.ratingsCount
               ? Math.min(1, (info.ratingsCount / 4000) + Math.random() * 0.2)
               : Math.random() * 0.5,
+            raw: info
           };
         });
         if (!aborted) {
@@ -504,7 +620,6 @@ function App() {
     return () => { aborted = true; };
   }, [genreObj.name]);
 
-  // Handle parallax effect
   useEffect(() => {
     const handleScroll = () => {
       if (bgRef.current) {
@@ -517,10 +632,13 @@ function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // PUBLIC_INTERFACE
+  const matchingUserBooks =
+    userBooks && userBooks.length > 0
+      ? userBooks.filter((b) => b.genre === genreObj.name)
+      : [];
+
   return (
     <div className="App" style={{ minHeight: "100vh", position: "relative" }}>
-      {/* Parallax background */}
       <div className="background-parallax" aria-hidden="true" ref={bgRef}></div>
       <header className="explorer-header">
         <h1 className="app-title">
@@ -560,6 +678,22 @@ function App() {
           >
             {animationMode === "subtle" ? "Subtle" : "Lively"}
           </button>
+          <button
+            onClick={onAddNewBookClick}
+            className="btn"
+            style={{
+              background: 'var(--accent-color,#fbbf24)',
+              color: '#1A1A1A',
+              border: 'none',
+              borderRadius: '1.5em',
+              fontWeight: 'bold',
+              fontSize: '1em',
+              padding: '0.36em 1.2em',
+              marginLeft: '2em',
+              cursor: 'pointer',
+              boxShadow: '0 1.5px 6px 0 rgba(251,191,36,0.09)',
+              transition: 'background 0.12s'
+            }}>Add Book</button>
         </div>
       </header>
       <main className="main-container">
@@ -605,10 +739,96 @@ function App() {
               {booksErrorMsg ? `Failed to load books: ${booksErrorMsg}` : "Error loading books."}
             </div>
           )}
-          {booksStatus === "done" && books.length === 0 && (
+          {booksStatus === "done" && books.length === 0 && matchingUserBooks.length === 0 && (
             <div style={{color:'var(--text-dim)', padding:'0.9em 0'}}>No books found for this genre.</div>
           )}
           <div className="books-grid">
+            {matchingUserBooks.map((book, idx) => {
+              const livelyAnim = pickLivelyAnimation(idx + 11);
+              const subtleAnim = pickSubtleAnimation(idx + 7);
+              const animClass =
+                animationMode === "lively"
+                  ? `book-card-anim book-card-lively book-${livelyAnim}`
+                  : `book-card-anim book-card-subtle book-${subtleAnim}`;
+              return (
+                <div
+                  className={`book-card ${animClass}`}
+                  tabIndex="0"
+                  key={"userbook-" + idx}
+                  aria-label={`Book: ${book.title} by ${book.author}`}
+                  style={{borderColor:'var(--secondary-color,#6366f1)'}}
+                >
+                  <div className="book-card-overlay" aria-hidden="true"
+                    style={{background: "linear-gradient(130deg,rgba(251,191,36,0.17) 41%,rgba(99,102,241,0.18) 100%)"}}
+                  ></div>
+                  <div className="book-card-content">
+                    <div className="book-cover-wrapper" style={{paddingBottom:"124px",marginBottom:".7rem"}}>
+                      <img
+                        src={book.image && book.image.trim() ? book.image : "https://via.placeholder.com/132x178.png?text=No+Cover"}
+                        alt={`Cover of ${book.title}`}
+                        className="book-cover"
+                        loading="lazy"
+                        style={{ background: "#fafcff", border: "1px solid #ececec" }}
+                      />
+                      <div
+                        aria-hidden="true"
+                        style={{
+                          position: "absolute",
+                          top: "0.78em",
+                          left: "0.86em",
+                          zIndex: 3,
+                          borderRadius: "999px",
+                          background: "rgba(255,255,255,0.93)",
+                          padding: "0.37em 0.37em 0.24em",
+                          boxShadow: "0 1.5px 5px #efefef55",
+                          fontSize: "1.45em",
+                          lineHeight: 1,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center"
+                        }}
+                        title={`${book.genre} genre`}
+                      >
+                        {GENRE_ICONS[book.genre]
+                          ? <span style={{ width:"1.6em",height:"1.6em",display:"flex",alignItems:"center",justifyContent:"center" }}>{GENRE_ICONS[book.genre]}</span>
+                          : <span role="img" aria-label={book.genre + " icon"} style={{fontSize:"1.6em"}}>{GENRE_EMOJIS[book.genre]||"📚"}</span>
+                        }
+                      </div>
+                      <div
+                        aria-hidden="true"
+                        style={{
+                          position: "absolute",
+                          top: "0.7em",
+                          right: "0.72em",
+                          zIndex: 3,
+                          display: "flex",
+                          gap: "0.35em",
+                          alignItems: "center"
+                        }}
+                      >
+                        <span style={{
+                          background:'#e53935',
+                          color:'#fff',
+                          padding:'0.36em 0.66em',
+                          borderRadius:'2em',
+                          fontWeight:600,
+                          fontSize:'0.98em'
+                        }}>Added</span>
+                      </div>
+                    </div>
+                    <div className="book-info" style={{marginTop:"-14px"}}>
+                      <div className="book-meta" style={{display:"flex",alignItems:"flex-start",gap:"0.5em",marginBottom:"4px"}}>
+                        <div style={{flex:1,minWidth:0}}>
+                          <h4 className="book-title" style={{marginBottom:"1.7px"}}>{book.title}</h4>
+                          <span className="book-author">{book.author}</span>
+                        </div>
+                      </div>
+                      <p className="book-description">{book.description}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
             {booksStatus === "done" && books.map((book, idx) => {
               const livelyAnim = pickLivelyAnimation(idx);
               const subtleAnim = pickSubtleAnimation(idx);
@@ -626,7 +846,6 @@ function App() {
                   key={idx}
                   aria-label={`Book: ${book.title} by ${book.author}`}
                 >
-                  {/* Glassmorphism overlay with genre tint */}
                   <div
                     className="book-card-overlay"
                     aria-hidden="true"
@@ -668,7 +887,6 @@ function App() {
                         loading="lazy"
                         style={{ background: "#fafcff", border: "1px solid #ececec" }}
                       />
-                      {/* Card Genre Icon */}
                       <div
                         aria-hidden="true"
                         style={{
@@ -693,7 +911,6 @@ function App() {
                           : <span role="img" aria-label={genreObj.name + " icon"} style={{fontSize:"1.6em"}}>{GENRE_EMOJIS[genreObj.name]}</span>
                         }
                       </div>
-                      {/* Rating/Popularity badge at corner */}
                       <div
                         aria-hidden="true"
                         style={{
@@ -715,7 +932,6 @@ function App() {
                           <h4 className="book-title" style={{marginBottom:"1.7px"}}>{book.title}</h4>
                           <span className="book-author">{book.author}</span>
                         </div>
-                        {/* Star Rating (to right of title/author) */}
                         <div
                           title={`Rating: ${rating} out of 5`}
                           aria-label={`Rating: ${rating} out of 5`}
@@ -746,4 +962,4 @@ function App() {
   );
 }
 
-export default App;
+export default AppWrapper;
