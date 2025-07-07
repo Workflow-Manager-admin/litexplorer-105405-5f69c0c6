@@ -2,26 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
 
 /**
- * Utility function: pseudo-random deterministic animation assignment per card on each render.
- */
-function pickLivelyAnimation(idx) {
-  const options = ['flipY', 'flipX', 'bounce', 'slide', 'rotate3D'];
-  // Use mod so the animation selection stays consistent per card
-  return options[idx % options.length];
-}
-
-/**
- * Utility function: assign subtle card entry animations.
- */
-function pickSubtleAnimation(idx) {
-  // Subtle: fade, scale, light slide
-  const options = ['subtle-fade', 'subtle-scale', 'subtle-slide'];
-  return options[idx % options.length];
-}
-
-/**
- * Returns consistent SVG/emoji icons per genre (for card icon and summary header).
- * Accessible, visually clear, modern.
+ * Icon and emoji assignments for genres
  */
 const GENRE_ICONS = {
   "Science Fiction": (
@@ -64,10 +45,6 @@ const GENRE_ICONS = {
     <svg width="32" height="32" aria-label="adventure" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="13" ry="13" fill="#fbbf24" opacity="0.10"/><polygon points="16,6 26,26 6,26" fill="#6366f1" opacity="0.19"/><ellipse cx="16" cy="21" rx="7.3" ry="2.2" fill="#E87A41" opacity="0.11"/></svg>
   ),
 };
-
-/**
- * Assigns a visually balanced, genre-themed emoji as fallback/card accent.
- */
 const GENRE_EMOJIS = {
   "Science Fiction": "🚀",
   "Fantasy": "🐉",
@@ -84,25 +61,270 @@ const GENRE_EMOJIS = {
   "Adventure": "🗺️",
 };
 
+const GENRES = [
+  { name: "Science Fiction", wiki: "Science_fiction" },
+  { name: "Fantasy", wiki: "Fantasy" },
+  { name: "Mystery", wiki: "Mystery_fiction" },
+  { name: "Nonfiction", wiki: "Non-fiction" },
+  { name: "Romance", wiki: "Romance_novel" },
+  { name: "Biography", wiki: "Biography" },
+  { name: "Dystopian", wiki: "Dystopian_literature" },
+  { name: "Historical", wiki: "Historical_fiction" },
+  { name: "Horror", wiki: "Horror_fiction" },
+  { name: "Young Adult", wiki: "Young_adult_fiction" },
+  { name: "Thriller", wiki: "Thriller_(genre)" },
+  { name: "Classic", wiki: "Classic_literature" },
+  { name: "Adventure", wiki: "Adventure_novel" },
+];
+
+
 /**
- * Generate a mock rating and popularity when not provided.
+ * PUBLIC_INTERFACE
+ * GenreDropdown: Accessible, custom dropdown with search, keyboard, icons, and animation
  */
+function GenreDropdown({
+  genres,
+  selectedGenre,
+  setSelectedGenre,
+  inputId = "genre-search",
+  labelId = "genre-label",
+}) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [focusIndex, setFocusIndex] = useState(-1);
+  const searchRef = useRef();
+  const dropdownRef = useRef();
+
+  useEffect(() => {
+    // Close dropdown on outside click/tap
+    function handler(e) {
+      if (dropdownOpen && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+        setFocusIndex(-1);
+      }
+    }
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [dropdownOpen]);
+
+  // Close on escape globally when open
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    function onEsc(evt) {
+      if (evt.key === 'Escape') {
+        setDropdownOpen(false);
+        setFocusIndex(-1);
+      }
+    }
+    document.addEventListener('keydown', onEsc);
+    return () => document.removeEventListener('keydown', onEsc);
+  }, [dropdownOpen]);
+
+  // Keyboard navigation in list
+  const filteredGenres = genres.filter(g => g.name.toLowerCase().includes(search.toLowerCase()));
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    if (focusIndex >= 0 && focusIndex < filteredGenres.length) {
+      const el = document.getElementById(`genre-item-${focusIndex}`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [focusIndex, dropdownOpen, filteredGenres.length]);
+
+  function handleInputKeyDown(e) {
+    if (e.key === "ArrowDown" && filteredGenres.length) {
+      setFocusIndex(0);
+    }
+    if (e.key === "Enter") {
+      setDropdownOpen((d) => !d);
+    }
+  }
+
+  function handleListKeyDown(e) {
+    if (e.key === "ArrowDown") {
+      setFocusIndex((c) => Math.min(filteredGenres.length - 1, c + 1));
+      e.preventDefault();
+    }
+    if (e.key === "ArrowUp") {
+      setFocusIndex((c) => Math.max(0, c - 1));
+      e.preventDefault();
+    }
+    if (e.key === "Enter" && focusIndex >= 0 && focusIndex < filteredGenres.length) {
+      setSelectedGenre(filteredGenres[focusIndex].name);
+      setDropdownOpen(false);
+      setFocusIndex(-1);
+      setTimeout(() => searchRef.current && searchRef.current.blur(), 0);
+    }
+    if (e.key === "Tab") {
+      setDropdownOpen(false); setFocusIndex(-1);
+    }
+  }
+
+  function handleGenreClick(idx, name) {
+    setSelectedGenre(name);
+    setDropdownOpen(false);
+    setFocusIndex(-1);
+  }
+
+  // Consistent dropdown width for both desktop/mobile
+  const dropdownWidth = 'min(320px, 97vw)';
+
+  return (
+    <div className="genre-select-wrapper" ref={dropdownRef} style={{ position: 'relative', width: dropdownWidth, flex: 1 }}>
+      <div style={{display: 'flex', alignItems: 'center', gap: 0}}>
+        <input
+          id={inputId}
+          ref={searchRef}
+          className="genre-search-input"
+          placeholder="Search genres…"
+          aria-label="Search genres"
+          value={search}
+          autoComplete="off"
+          onClick={() => setDropdownOpen(true)}
+          onFocus={() => setDropdownOpen(true)}
+          onChange={e => {
+            setSearch(e.target.value);
+            setDropdownOpen(true);
+            setFocusIndex(-1);
+          }}
+          onKeyDown={handleInputKeyDown}
+          style={{width: '100%', background: '#fff'}}
+        />
+        <button
+          aria-haspopup="listbox"
+          aria-expanded={dropdownOpen}
+          aria-controls="genre-listbox"
+          tabIndex={0}
+          className="genre-select"
+          style={{
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            marginLeft: '-35px',
+            color: "var(--secondary-color)",
+            fontSize: '1.4em',
+            padding: 0,
+            position: "relative",
+            zIndex: 3,
+            width: 30,
+            height: 35
+          }}
+          title="Show genres"
+          onClick={() => { setDropdownOpen(d => !d); setFocusIndex(-1); }}
+        >▼</button>
+      </div>
+      {dropdownOpen && (
+        <div
+          className="genre-dropdown-list"
+          role="listbox"
+          aria-labelledby={labelId}
+          id="genre-listbox"
+          tabIndex={-1}
+          onKeyDown={handleListKeyDown}
+          style={{
+            position: 'absolute',
+            top: "2.5em",
+            left: 0,
+            width: dropdownWidth,
+            maxHeight: 240,
+            overflowY: 'auto',
+            background: '#fff',
+            border: '1.5px solid var(--border-color)',
+            borderRadius: '0.6em',
+            boxShadow: '0 6px 24px 0 rgba(55, 65, 81, 0.12)',
+            zIndex: 20,
+            transition: 'opacity 0.13s cubic-bezier(.63,.19,.19,1.2)',
+            animation: 'fadeIn .18s cubic-bezier(.41,1.19,.13,1.01)'
+          }}
+        >
+          {filteredGenres.length === 0 && (
+            <div
+              style={{
+                padding: "0.8em 1em",
+                color: "#bbb",
+                fontWeight: 500
+              }}
+            >
+              No genres found
+            </div>
+          )}
+          {filteredGenres.map((g, idx) =>
+            <div
+              key={g.name}
+              id={`genre-item-${idx}`}
+              role="option"
+              aria-selected={selectedGenre === g.name}
+              tabIndex={-1}
+              className="genre-dropdown-item"
+              style={{
+                display: 'flex',
+                alignItems: "center",
+                padding: "0.65em 1.03em",
+                fontSize: "1.08em",
+                background: focusIndex === idx
+                  ? "var(--secondary-color)"
+                  : selectedGenre === g.name
+                  ? "rgba(99,102,241,0.13)"
+                  : "#fff",
+                color: focusIndex === idx
+                  ? "#fff"
+                  : selectedGenre === g.name
+                  ? "var(--primary-color)"
+                  : "#282c34",
+                borderRadius: '.45em',
+                margin: "0.11em 0.18em",
+                cursor: "pointer",
+                fontWeight: 600,
+                outline: focusIndex === idx ? "2.5px solid var(--accent-color)" : "none",
+                userSelect: "none",
+                transition: "background 0.14s, color 0.14s"
+              }}
+              onMouseDown={e => { e.preventDefault(); handleGenreClick(idx, g.name);}}
+              onMouseEnter={() => setFocusIndex(idx)}
+              onMouseLeave={() => setFocusIndex(-1)}
+              onKeyDown={e => e.key === "Enter" && handleGenreClick(idx, g.name)}
+            >
+              {/* Display icon/emoji, SVG preferred */}
+              {GENRE_ICONS[g.name]
+                ? <span aria-hidden="true" style={{width: "1.53em", height: "1.53em", marginRight: "0.59em", display: "flex", alignItems: "center"}}>{GENRE_ICONS[g.name]}</span>
+                : <span aria-hidden="true" style={{fontSize:"1.2em", marginRight: "0.72em"}}>{GENRE_EMOJIS[g.name] || "📚"}</span>
+              }
+              <span>{g.name}</span>
+              {selectedGenre === g.name &&
+                <span aria-hidden="true" style={{marginLeft: "auto", color: "var(--accent-color)", fontSize: "1.2em"}}>✓</span>
+              }
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+/**
+ * Utility cards/animations/visuals (same as before/unchanged)
+ */
+function pickLivelyAnimation(idx) {
+  const options = ['flipY', 'flipX', 'bounce', 'slide', 'rotate3D'];
+  return options[idx % options.length];
+}
+function pickSubtleAnimation(idx) {
+  const options = ['subtle-fade', 'subtle-scale', 'subtle-slide'];
+  return options[idx % options.length];
+}
 function getBookVisuals(book, idx = 0) {
-  // Try to use Google Books rating/popularity fields if available
   let rating = book.averageRating || book.rating || 4.0 + (idx % 11) / 10;
   let popularity = book.popularity !== undefined
     ? Math.min(1, book.popularity)
     : ((idx % 4) + 1) / 5;
   return { rating, popularity };
 }
-
-/**
- * Renders a star rating out of five, with 0.5 step, using accessible emoji/SVG.
- */
 function StarRating({ rating }) {
-  // Round to 0.5
   const rounded = Math.round(rating * 2) / 2;
-  // Filled, half, empty star logic
   const stars = [];
   for (let i = 1; i <= 5; ++i) {
     if (rounded >= i) {
@@ -113,12 +335,8 @@ function StarRating({ rating }) {
       stars.push(<span key={i} aria-label="empty star" style={{color:'#e9ecef', fontSize:'1.15em',marginRight:1}}>&#9734;</span>);
     }
   }
-  return <span style={{display:'inline-flex',verticalAlign:'middle'}}>{stars}</span>;
+  return <span style={{display:'inline-flex', verticalAlign:'middle'}}>{stars}</span>;
 }
-
-/**
- * Renders a popularity badge (color accent + 🔥 emoji if high).
- */
 function PopularityBadge({ popularity }) {
   let color = "#e9ecef";
   let label = "Typical";
@@ -165,70 +383,42 @@ function PopularityBadge({ popularity }) {
   );
 }
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * Main App (with enhanced custom genre dropdown)
+ */
 function App() {
   // For parallax effect
   const bgRef = useRef(null);
-
-  // Animation mode: 'subtle' or 'lively'
   const [animationMode, setAnimationMode] = useState("subtle");
-
-  // List of genres, each with a Wikipedia-friendly search string.
-  // Expanded for richer literary exploration.
-  const genres = [
-    { name: "Science Fiction", wiki: "Science_fiction" },
-    { name: "Fantasy", wiki: "Fantasy" },
-    { name: "Mystery", wiki: "Mystery_fiction" },
-    { name: "Nonfiction", wiki: "Non-fiction" },
-    { name: "Romance", wiki: "Romance_novel" },
-    { name: "Biography", wiki: "Biography" },
-    { name: "Dystopian", wiki: "Dystopian_literature" },
-    { name: "Historical", wiki: "Historical_fiction" },
-    { name: "Horror", wiki: "Horror_fiction" },
-    { name: "Young Adult", wiki: "Young_adult_fiction" },
-    { name: "Thriller", wiki: "Thriller_(genre)" },
-    { name: "Classic", wiki: "Classic_literature" },
-    { name: "Adventure", wiki: "Adventure_novel" },
-  ];
-
-  const [selectedGenre, setSelectedGenre] = useState(genres[0].name);
-  const [genreQuery, setGenreQuery] = useState("");
+  const [selectedGenre, setSelectedGenre] = useState(GENRES[0].name);
   const [genreSummary, setGenreSummary] = useState("");
-  const [genreSummaryStatus, setGenreSummaryStatus] = useState("idle"); // "idle", "loading", "error", "done"
-  const [books, setBooks] = useState([]);
-  const [booksStatus, setBooksStatus] = useState("idle");  // "idle", "loading", "error", "done"
-  const [booksErrorMsg, setBooksErrorMsg] = useState("");
+  const [genreSummaryStatus, setGenreSummaryStatus] = useState("idle");
   const [summaryErrorMsg, setSummaryErrorMsg] = useState("");
+  const [books, setBooks] = useState([]);
+  const [booksStatus, setBooksStatus] = useState("idle");
+  const [booksErrorMsg, setBooksErrorMsg] = useState("");
 
-  // Utility: find genre object from name
-  const genreObj = genres.find((g) => g.name === selectedGenre);
+  // Util: genre object for details
+  const genreObj = GENRES.find(g => g.name === selectedGenre) || GENRES[0];
 
-  // For minimal search/filter effect in dropdown
-  const filteredGenres = genres.filter((g) =>
-    g.name.toLowerCase().includes(genreQuery.toLowerCase())
-  );
-
-  // --- Fetch genre summary from Wikipedia ---
+  // Wikipedia summary for genre
   useEffect(() => {
     let aborted = false;
     async function fetchSummary() {
       setGenreSummaryStatus("loading");
       setSummaryErrorMsg("");
       try {
-        // Use Wikipedia REST summary API for best-guess/short summary.
         const resp = await fetch(
           `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(genreObj.wiki)}`
         );
         if (!resp.ok) throw new Error(`Wikipedia API error (${resp.status})`);
         const data = await resp.json();
-        // Wikipedia API: get extract (short summary), fallback to first 350 chars of description.
         let summary = data.extract || (data.description ? data.description.substring(0, 350) : "");
         if (!summary && data.type === "disambiguation" && Array.isArray(data.titles)) {
           summary = "No summary available. (Disambiguation page)";
         }
-        if (!summary) {
-          throw new Error("Wikipedia summary not found.");
-        }
+        if (!summary) throw new Error("Wikipedia summary not found.");
         if (!aborted) {
           setGenreSummary(summary);
           setGenreSummaryStatus("done");
@@ -243,17 +433,15 @@ function App() {
     }
     fetchSummary();
     return () => { aborted = true; };
-    // genreObj.wiki update triggers fetch
   }, [genreObj.wiki]);
 
-  // --- Fetch book data from Google Books API (filter by genre/topic) ---
+  // Fetch books from Google Books
   useEffect(() => {
     let aborted = false;
     async function fetchBooks() {
       setBooksStatus("loading");
       setBooksErrorMsg("");
       setBooks([]);
-      // Use a mapping for good genre queries
       const genreQueryMap = {
         "Science Fiction": "science fiction",
         "Fantasy": "fantasy",
@@ -270,16 +458,13 @@ function App() {
         "Adventure": "adventure",
       };
       const subject = genreQueryMap[genreObj.name] || genreObj.name;
-      // Build the query for bestbooks by subject: uses 'subject' and ordered by relevance
       const baseURL = "https://www.googleapis.com/books/v1/volumes";
-      // Show only print books, relevance ordering, limit to 8.
       const params = `?q=subject:${encodeURIComponent(subject)}&maxResults=8&printType=books&orderBy=relevance&langRestrict=en`;
       try {
         const resp = await fetch(baseURL + params);
         if (!resp.ok) throw new Error(`Google Books API error (${resp.status})`);
         const data = await resp.json();
         if (!data.items || !Array.isArray(data.items)) throw new Error("No books found.");
-        // Map to our structure, provide fallbacks for missing images/authors/descriptions.
         const parsedBooks = data.items.map((item) => {
           const info = item.volumeInfo || {};
           return {
@@ -297,10 +482,7 @@ function App() {
               info.previewLink ||
               info.infoLink ||
               "https://books.google.com/",
-
-            // API-provided fields for visuals:
             averageRating: info.averageRating || null,
-            // Not a real API popularity field but randomize for visual accent
             popularity: info.ratingsCount
               ? Math.min(1, (info.ratingsCount / 4000) + Math.random() * 0.2)
               : Math.random() * 0.5,
@@ -320,16 +502,13 @@ function App() {
     }
     fetchBooks();
     return () => { aborted = true; };
-    // genreObj update triggers books fetch
   }, [genreObj.name]);
 
-  // Handle hero parallax effect on scroll
+  // Handle parallax effect
   useEffect(() => {
     const handleScroll = () => {
       if (bgRef.current) {
-        // Parallax: move slower than scroll position
         const scrollY = window.scrollY;
-        // Clamp to not drag too much when scroll is low/high
         const y = Math.min(scrollY * 0.38, 120);
         bgRef.current.style.transform = `translateY(${y}px) scale(1.08)`;
       }
@@ -341,13 +520,8 @@ function App() {
   // PUBLIC_INTERFACE
   return (
     <div className="App" style={{ minHeight: "100vh", position: "relative" }}>
-      {/* Parallax Movement Layer */}
-      <div
-        className="background-parallax"
-        aria-hidden="true"
-        ref={bgRef}
-      ></div>
-
+      {/* Parallax background */}
+      <div className="background-parallax" aria-hidden="true" ref={bgRef}></div>
       <header className="explorer-header">
         <h1 className="app-title">
           <span style={{ color: "var(--accent-color)" }}>Genre</span> Explorer
@@ -388,72 +562,18 @@ function App() {
           </button>
         </div>
       </header>
-
       <main className="main-container">
         <section className="genre-selection-section" aria-label="Select Genre">
-          <label htmlFor="genre-select" className="genre-label">
+          <label htmlFor="genre-search" className="genre-label" id="genre-label">
             Pick a genre:
           </label>
-          <div className="genre-select-wrapper">
-            <input
-              className="genre-search-input"
-              type="text"
-              placeholder="Search genres…"
-              value={genreQuery}
-              onChange={(e) => setGenreQuery(e.target.value)}
-              aria-label="Search genres"
-            />
-            <div style={{ position: "relative", width: "min(300px, 96vw)" }}>
-              <select
-                id="genre-select"
-                className="genre-select"
-                value={selectedGenre}
-                aria-label="Genre select dropdown"
-                aria-haspopup="listbox"
-                aria-expanded="true"
-                onChange={(e) => setSelectedGenre(e.target.value)}
-                size={filteredGenres.length > 8 ? 8 : filteredGenres.length || 1}
-                style={{
-                  background: "#fff",
-                  minWidth: 200,
-                  width: "100%",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  appearance: "none",
-                  transition: "box-shadow 0.18s,border 0.13s",
-                  outline: "none",
-                }}
-              >
-                {filteredGenres.length === 0 ? (
-                  <option value="">No genres found</option>
-                ) : (
-                  filteredGenres.map((g) => (
-                    <option key={g.name} value={g.name}>
-                      {/* Dropdown icons as emoji fallback for option (SVG not supported in native <option>) */}
-                      {GENRE_EMOJIS[g.name] ? GENRE_EMOJIS[g.name] + " " : ""}
-                      {g.name}
-                    </option>
-                  ))
-                )}
-              </select>
-              {/* Custom dropdown icon for visual cue (chevron) */}
-              <span
-                aria-hidden="true"
-                style={{
-                  pointerEvents: "none",
-                  position: "absolute",
-                  right: 10,
-                  top: "61%",
-                  transform: "translateY(-50%)",
-                  fontSize: "1.25em",
-                  color: "var(--secondary-color)",
-                  zIndex: 2,
-                  userSelect: "none"
-                }}
-              >▼</span>
-            </div>
-          </div>
+          <GenreDropdown
+            genres={GENRES}
+            selectedGenre={selectedGenre}
+            setSelectedGenre={setSelectedGenre}
+            inputId="genre-search"
+            labelId="genre-label"
+          />
         </section>
         <section className="genre-summary-section" aria-label="Genre Summary">
           <div className="genre-summary-row">
@@ -472,7 +592,6 @@ function App() {
             </div>
           </div>
         </section>
-
         <section className="books-grid-section" aria-label="Books">
           <h3 className="books-title">
             Influential &amp; Popular Books in{" "}
@@ -491,7 +610,6 @@ function App() {
           )}
           <div className="books-grid">
             {booksStatus === "done" && books.map((book, idx) => {
-              // Determine the card's animation
               const livelyAnim = pickLivelyAnimation(idx);
               const subtleAnim = pickSubtleAnimation(idx);
               const animClass =
@@ -499,12 +617,6 @@ function App() {
                   ? `book-card-anim book-card-lively book-${livelyAnim}`
                   : `book-card-anim book-card-subtle book-${subtleAnim}`;
 
-              // Get genre icon/emoji for this card
-              const cardIcon =
-                GENRE_ICONS[genreObj.name] ||
-                <span style={{ fontSize: "2em", marginRight: 8 }}>{GENRE_EMOJIS[genreObj.name] || "📚"}</span>;
-
-              // Get visual indicators
               const { rating, popularity } = getBookVisuals(book, idx);
 
               return (
@@ -512,6 +624,7 @@ function App() {
                   className={`book-card ${animClass}`}
                   tabIndex="0"
                   key={idx}
+                  aria-label={`Book: ${book.title} by ${book.author}`}
                 >
                   {/* Glassmorphism overlay with genre tint */}
                   <div
@@ -519,7 +632,6 @@ function App() {
                     aria-hidden="true"
                     style={{
                       background:
-                        // Match overlays for new genres!
                         genreObj.name === "Science Fiction"
                           ? "linear-gradient(120deg,rgba(99,102,241,0.31) 38%,rgba(251,191,36,0.13) 80%,rgba(232,122,65,0.12) 100%)"
                           : genreObj.name === "Fantasy"
