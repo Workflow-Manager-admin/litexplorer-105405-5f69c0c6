@@ -94,6 +94,51 @@ body, .App {
   flex-wrap: wrap;
 }
 
+.genre-search-input:focus, .genre-select:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 2px 20px 0 rgba(99,102,241,0.12);
+  outline: none;
+  background: #fff;
+}
+
+.genre-select {
+  transition: box-shadow 0.18s, border 0.18s, background 0.19s, color 0.19s;
+  cursor: pointer;
+}
+
+.genre-select option {
+  padding: 0.6em 1.2em 0.6em 1.3em;
+}
+
+@media (max-width: 780px) {
+  .genre-select-wrapper input,
+  .genre-select-wrapper select {
+    min-width: 110px;
+    font-size: 0.97rem;
+  }
+}
+
+/* Visually highlight selected genre in dropdown in focus for accessibility */
+.genre-select:focus option:checked {
+  background: var(--secondary-color);
+  color: #fff;
+}
+
+/* Dropdown chevron style override for select wrapper */
+.genre-select-wrapper span[aria-hidden="true"] {
+  position: absolute;
+  right: 0.9rem;
+  top: 59%;
+  pointer-events: none;
+  color: var(--secondary-color);
+  font-size: 1.19em;
+  z-index: 2;
+}
+
+.genre-select-wrapper {
+  position: relative;
+}
+
 .genre-search-input {
   padding: 0.47rem 1rem;
   border: 1px solid var(--border-color);

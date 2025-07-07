@@ -36,6 +36,33 @@ const GENRE_ICONS = {
   "Nonfiction": (
     <svg width="29" height="29" aria-label="nonfiction" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 29 29" fill="none"><rect x="3" y="4" width="19" height="21" rx="2.6" fill="#E87A41" opacity="0.14"/><rect x="7" y="4" width="15" height="21" rx="2.6" fill="#6366f1" opacity="0.13"/><rect x="8.9" y="8" width="6.2" height="1.1" rx="0.5" fill="#6366f1" opacity="0.22"/><rect x="8.9" y="11.1" width="9.1" height="1.1" rx="0.5" fill="#6366f1" opacity="0.12"/></svg>
   ),
+  "Romance": (
+    <svg width="30" height="30" aria-label="romance" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 30 30"><ellipse cx="15" cy="15" rx="13" ry="13" fill="#fbbf24" opacity="0.12"/><path d="M15 23s-7.5-5.222-7.5-10.083C7.5 9.156 10.203 7 13.083 7A4.057 4.057 0 0 1 15 8.667 4.057 4.057 0 0 1 16.917 7C19.797 7 22.5 9.156 22.5 12.917c0 4.861-7.5 10.083-7.5 10.083z" fill="#E87A41" opacity="0.48"/></svg>
+  ),
+  "Biography": (
+    <svg width="32" height="32" aria-label="biography" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="14" ry="14" fill="#6366f1" opacity="0.07"/><ellipse cx="16" cy="23" rx="7.5" ry="3" fill="#fbbf24" opacity="0.11"/><circle cx="16" cy="13" r="4" fill="#E87A41" opacity="0.28"/><ellipse cx="16" cy="19" rx="4" ry="2" fill="#6366f1" opacity="0.2"/></svg>
+  ),
+  "Dystopian": (
+    <svg width="32" height="32" aria-label="dystopian" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="14" ry="14" fill="#374151" opacity="0.08"/><rect x="7" y="19" width="18" height="5" rx="2.5" fill="#6366f1" opacity="0.13"/><rect x="10" y="8" width="12" height="15" rx="4" fill="#E87A41" opacity="0.22"/><rect x="14" y="14" width="4" height="9" rx="1.3" fill="#6366f1" opacity="0.18"/></svg>
+  ),
+  "Historical": (
+    <svg width="30" height="30" aria-label="historical" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 30 30"><ellipse cx="15" cy="15" rx="13" ry="13" fill="#E87A41" opacity="0.07"/><rect x="8" y="12" width="14" height="7" rx="1.8" fill="#6366f1" opacity="0.13"/><rect x="10" y="8" width="10" height="6" rx="1.4" fill="#fbbf24" opacity="0.23"/></svg>
+  ),
+  "Horror": (
+    <svg width="29" height="29" aria-label="horror" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 29 29" fill="none"><ellipse cx="14.5" cy="14.5" rx="13.5" ry="13.5" fill="#e53935" opacity="0.083"/><ellipse cx="14.5" cy="23" rx="7.5" ry="2.5" fill="#E87A41" opacity="0.13"/><ellipse cx="14.5" cy="13.5" rx="4.7" ry="5.3" fill="#6366f1" opacity="0.18"/><rect x="9.5" y="17" width="10" height="2" rx="1" fill="#e53935" opacity="0.16"/></svg>
+  ),
+  "Young Adult": (
+    <svg width="30" height="30" aria-label="young adult" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 30 30"><ellipse cx="15" cy="15" rx="13" ry="13" fill="#fbbf24" opacity="0.09"/><ellipse cx="15" cy="23" rx="6" ry="2" fill="#6366f1" opacity="0.13"/><ellipse cx="15" cy="15" rx="7" ry="2.2" fill="#6366f1" opacity="0.15"/><circle cx="15" cy="11.5" r="3.1" fill="#E87A41" opacity="0.32"/></svg>
+  ),
+  "Thriller": (
+    <svg width="32" height="32" aria-label="thriller" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="14" ry="14" fill="#374151" opacity="0.11"/><ellipse cx="16" cy="23" rx="7" ry="2" fill="#6366f1" opacity="0.16"/><polygon points="15,10 18,10 21,17 12,17" fill="#E87A41" opacity="0.22"/></svg>
+  ),
+  "Classic": (
+    <svg width="28" height="28" aria-label="classic" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 28 28"><ellipse cx="14" cy="14" rx="12" ry="12" fill="#e2e6ea" opacity="0.10"/><rect x="10" y="8" width="8" height="12" rx="1.6" fill="#E87A41" opacity="0.18"/><rect x="11.2" y="10" width="5.6" height="8.5" rx="1.1" fill="#6366f1" opacity="0.16"/></svg>
+  ),
+  "Adventure": (
+    <svg width="32" height="32" aria-label="adventure" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="13" ry="13" fill="#fbbf24" opacity="0.10"/><polygon points="16,6 26,26 6,26" fill="#6366f1" opacity="0.19"/><ellipse cx="16" cy="21" rx="7.3" ry="2.2" fill="#E87A41" opacity="0.11"/></svg>
+  ),
 };
 
 /**
@@ -46,6 +73,15 @@ const GENRE_EMOJIS = {
   "Fantasy": "🐉",
   "Mystery": "🕵️‍♂️",
   "Nonfiction": "🖋️",
+  "Romance": "💕",
+  "Biography": "👤",
+  "Dystopian": "🏙️",
+  "Historical": "🏛️",
+  "Horror": "🧛",
+  "Young Adult": "🧢",
+  "Thriller": "🔪",
+  "Classic": "📜",
+  "Adventure": "🗺️",
 };
 
 /**
@@ -138,11 +174,21 @@ function App() {
   const [animationMode, setAnimationMode] = useState("subtle");
 
   // List of genres, each with a Wikipedia-friendly search string.
+  // Expanded for richer literary exploration.
   const genres = [
     { name: "Science Fiction", wiki: "Science_fiction" },
     { name: "Fantasy", wiki: "Fantasy" },
     { name: "Mystery", wiki: "Mystery_fiction" },
     { name: "Nonfiction", wiki: "Non-fiction" },
+    { name: "Romance", wiki: "Romance_novel" },
+    { name: "Biography", wiki: "Biography" },
+    { name: "Dystopian", wiki: "Dystopian_literature" },
+    { name: "Historical", wiki: "Historical_fiction" },
+    { name: "Horror", wiki: "Horror_fiction" },
+    { name: "Young Adult", wiki: "Young_adult_fiction" },
+    { name: "Thriller", wiki: "Thriller_(genre)" },
+    { name: "Classic", wiki: "Classic_literature" },
+    { name: "Adventure", wiki: "Adventure_novel" },
   ];
 
   const [selectedGenre, setSelectedGenre] = useState(genres[0].name);
@@ -213,6 +259,15 @@ function App() {
         "Fantasy": "fantasy",
         "Mystery": "mystery",
         "Nonfiction": "nonfiction",
+        "Romance": "romance",
+        "Biography": "biography",
+        "Dystopian": "dystopian",
+        "Historical": "historical fiction",
+        "Horror": "horror",
+        "Young Adult": "young adult",
+        "Thriller": "thriller",
+        "Classic": "classic literature",
+        "Adventure": "adventure",
       };
       const subject = genreQueryMap[genreObj.name] || genreObj.name;
       // Build the query for bestbooks by subject: uses 'subject' and ordered by relevance
@@ -348,22 +403,56 @@ function App() {
               onChange={(e) => setGenreQuery(e.target.value)}
               aria-label="Search genres"
             />
-            <select
-              id="genre-select"
-              className="genre-select"
-              value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}
-            >
-              {filteredGenres.length === 0 ? (
-                <option value="">No genres found</option>
-              ) : (
-                filteredGenres.map((g) => (
-                  <option key={g.name} value={g.name}>
-                    {g.name}
-                  </option>
-                ))
-              )}
-            </select>
+            <div style={{ position: "relative", width: "min(300px, 96vw)" }}>
+              <select
+                id="genre-select"
+                className="genre-select"
+                value={selectedGenre}
+                aria-label="Genre select dropdown"
+                aria-haspopup="listbox"
+                aria-expanded="true"
+                onChange={(e) => setSelectedGenre(e.target.value)}
+                size={filteredGenres.length > 8 ? 8 : filteredGenres.length || 1}
+                style={{
+                  background: "#fff",
+                  minWidth: 200,
+                  width: "100%",
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  appearance: "none",
+                  transition: "box-shadow 0.18s,border 0.13s",
+                  outline: "none",
+                }}
+              >
+                {filteredGenres.length === 0 ? (
+                  <option value="">No genres found</option>
+                ) : (
+                  filteredGenres.map((g) => (
+                    <option key={g.name} value={g.name}>
+                      {/* Dropdown icons as emoji fallback for option (SVG not supported in native <option>) */}
+                      {GENRE_EMOJIS[g.name] ? GENRE_EMOJIS[g.name] + " " : ""}
+                      {g.name}
+                    </option>
+                  ))
+                )}
+              </select>
+              {/* Custom dropdown icon for visual cue (chevron) */}
+              <span
+                aria-hidden="true"
+                style={{
+                  pointerEvents: "none",
+                  position: "absolute",
+                  right: 10,
+                  top: "61%",
+                  transform: "translateY(-50%)",
+                  fontSize: "1.25em",
+                  color: "var(--secondary-color)",
+                  zIndex: 2,
+                  userSelect: "none"
+                }}
+              >▼</span>
+            </div>
           </div>
         </section>
         <section className="genre-summary-section" aria-label="Genre Summary">
@@ -430,12 +519,31 @@ function App() {
                     aria-hidden="true"
                     style={{
                       background:
+                        // Match overlays for new genres!
                         genreObj.name === "Science Fiction"
                           ? "linear-gradient(120deg,rgba(99,102,241,0.31) 38%,rgba(251,191,36,0.13) 80%,rgba(232,122,65,0.12) 100%)"
                           : genreObj.name === "Fantasy"
                           ? "linear-gradient(120deg,rgba(251,191,36,0.19),rgba(99,102,241,0.13) 75%,rgba(255,255,255,0.16) 100%)"
                           : genreObj.name === "Mystery"
                           ? "linear-gradient(120deg,rgba(99,102,241,.20),rgba(232,122,65,.13) 42%,rgba(55,65,81,0.13) 100%)"
+                          : genreObj.name === "Romance"
+                          ? "linear-gradient(127deg,rgba(232,122,65,0.13) 36%,rgba(251,191,36,0.23) 80%,rgba(255,37,73,0.14) 100%)"
+                          : genreObj.name === "Biography"
+                          ? "linear-gradient(120deg,rgba(99,102,241,0.16) 19%,rgba(251,191,36,0.07) 100%)"
+                          : genreObj.name === "Dystopian"
+                          ? "linear-gradient(130deg,rgba(55,65,81,0.18) 55%,rgba(232,122,65,0.09) 100%)"
+                          : genreObj.name === "Historical"
+                          ? "linear-gradient(110deg,rgba(251,191,36,0.15) 30%,rgba(99,102,241,0.09) 100%)"
+                          : genreObj.name === "Horror"
+                          ? "linear-gradient(120deg,rgba(229,57,53,0.18),rgba(99,102,241,0.06) 80%,rgba(232,122,65,0.14) 100%)"
+                          : genreObj.name === "Young Adult"
+                          ? "linear-gradient(127deg,rgba(99,102,241,0.11) 49%,rgba(251,191,36,0.18) 100%)"
+                          : genreObj.name === "Thriller"
+                          ? "linear-gradient(130deg,rgba(229,57,53,0.09) 41%,rgba(99,102,241,0.19) 100%)"
+                          : genreObj.name === "Classic"
+                          ? "linear-gradient(120deg,rgba(251,191,36,0.15) 17%,rgba(232,122,65,0.12) 100%)"
+                          : genreObj.name === "Adventure"
+                          ? "linear-gradient(120deg,rgba(251,191,36,0.17) 63%,rgba(99,102,241,0.08) 100%)"
                           : "linear-gradient(110deg,rgba(232,122,65,0.12) 20%,rgba(99,102,241,0.08) 100%)",
                     }}
                   ></div>
