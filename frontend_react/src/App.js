@@ -1,20 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
 
-// Utility: pseudo-random deterministic animation assignment per card on each render
+/**
+ * Utility function: pseudo-random deterministic animation assignment per card on each render.
+ */
 function pickLivelyAnimation(idx) {
   const options = ['flipY', 'flipX', 'bounce', 'slide', 'rotate3D'];
   // Use mod so the animation selection stays consistent per card
   return options[idx % options.length];
 }
 
+/**
+ * Utility function: assign subtle card entry animations.
+ */
 function pickSubtleAnimation(idx) {
   // Subtle: fade, scale, light slide
   const options = ['subtle-fade', 'subtle-scale', 'subtle-slide'];
   return options[idx % options.length];
 }
 
-// Simple genre icon SVGs for demonstration
+/**
+ * Returns consistent SVG/emoji icons per genre (for card icon and summary header).
+ * Accessible, visually clear, modern.
+ */
 const GENRE_ICONS = {
   "Science Fiction": (
     <svg width="31" height="31" aria-label="sci-fi" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 31 31" fill="none"><circle cx="15.5" cy="15.5" r="13.5" fill="#6366f1" opacity="0.13"/><ellipse cx="15.5" cy="19" rx="7.5" ry="2.5" fill="#E87A41" opacity="0.3"/><ellipse cx="15.5" cy="14.7" rx="8.6" ry="3.2" fill="#6366f1" opacity="0.17"/><circle cx="15.5" cy="13" r="4.5" fill="#6366f1" /></svg>
@@ -29,6 +37,99 @@ const GENRE_ICONS = {
     <svg width="29" height="29" aria-label="nonfiction" style={{marginRight:10,verticalAlign:'middle'}} viewBox="0 0 29 29" fill="none"><rect x="3" y="4" width="19" height="21" rx="2.6" fill="#E87A41" opacity="0.14"/><rect x="7" y="4" width="15" height="21" rx="2.6" fill="#6366f1" opacity="0.13"/><rect x="8.9" y="8" width="6.2" height="1.1" rx="0.5" fill="#6366f1" opacity="0.22"/><rect x="8.9" y="11.1" width="9.1" height="1.1" rx="0.5" fill="#6366f1" opacity="0.12"/></svg>
   ),
 };
+
+/**
+ * Assigns a visually balanced, genre-themed emoji as fallback/card accent.
+ */
+const GENRE_EMOJIS = {
+  "Science Fiction": "🚀",
+  "Fantasy": "🐉",
+  "Mystery": "🕵️‍♂️",
+  "Nonfiction": "🖋️",
+};
+
+/**
+ * Generate a mock rating and popularity for demonstration (normally from API).
+ * - Returns {rating: float (1-5), popularity: float (0-1)}.
+ */
+function getBookVisuals(book, idx) {
+  // Mock by hash of title for demo
+  const hash = Array.from(book.title).reduce((a, c) => a + c.charCodeAt(0), 0) + idx * 17;
+  // Rating: 3.2–5.0 (rounded to 1 decimal)
+  const rating = Math.round((3.2 + (hash % 18) * 0.1) * 10) / 10;
+  // Popularity (0-1 for badge/flare)
+  const popularity = ((hash * 31) % 100) / 100;
+  return { rating, popularity };
+}
+
+/**
+ * Renders a star rating out of five, with 0.5 step, using accessible emoji/SVG.
+ */
+function StarRating({ rating }) {
+  // Round to 0.5
+  const rounded = Math.round(rating * 2) / 2;
+  // Filled, half, empty star logic
+  const stars = [];
+  for (let i = 1; i <= 5; ++i) {
+    if (rounded >= i) {
+      stars.push(<span key={i} aria-label="star" style={{color:'#fbbf24', fontSize:'1.15em',marginRight:1}}>&#9733;</span>);
+    } else if (rounded >= i - 0.5) {
+      stars.push(<span key={i} aria-label="half star" style={{color:'#fbbf24', fontSize:'1.15em',marginRight:1}}>&#189;</span>);
+    } else {
+      stars.push(<span key={i} aria-label="empty star" style={{color:'#e9ecef', fontSize:'1.15em',marginRight:1}}>&#9734;</span>);
+    }
+  }
+  return <span style={{display:'inline-flex',verticalAlign:'middle'}}>{stars}</span>;
+}
+
+/**
+ * Renders a popularity badge (color accent + 🔥 emoji if high).
+ */
+function PopularityBadge({ popularity }) {
+  let color = "#e9ecef";
+  let label = "Typical";
+  if (popularity > 0.86) {
+    color = "#e53935";
+    label = "Trending";
+  } else if (popularity > 0.7) {
+    color = "#fbbf24";
+    label = "Popular";
+  } else if (popularity > 0.48) {
+    color = "#6366f1";
+    label = "Well-liked";
+  }
+  return (
+    <span
+      role="img"
+      aria-label={label}
+      style={{
+        background: color,
+        color: color === "#fbbf24" ? "#222" : "#fff",
+        padding: "0.36em 0.66em",
+        borderRadius: "2em",
+        fontWeight: 600,
+        fontSize: "0.98em",
+        boxShadow:
+          color === "#e53935"
+            ? "0 4px 16px 0 rgba(229,57,53,0.09)"
+            : color === "#fbbf24"
+            ? "0 2px 7px 0 rgba(251,191,36,0.08)"
+            : undefined,
+        marginLeft: 7,
+        marginRight: 2,
+        display: "inline-flex",
+        alignItems: "center",
+        verticalAlign: "middle",
+        gap: "0.28em"
+      }}
+    >
+      {label}
+      {label === "Trending" && <span aria-label="fire" style={{marginLeft:2,fontSize:'1.18em'}}>🔥</span>}
+      {label === "Popular" && <span aria-label="star" style={{marginLeft:2,fontSize:'1.13em'}}>⭐</span>}
+      {label === "Well-liked" && <span aria-label="thumbs up" style={{marginLeft:2,fontSize:'1.09em'}}>👍</span>}
+    </span>
+  );
+}
 
 // PUBLIC_INTERFACE
 function App() {
@@ -359,13 +460,21 @@ function App() {
           </h3>
           <div className="books-grid">
             {bookList.map((book, idx) => {
-              // Animation assignment
+              // Determine the card's animation
               const livelyAnim = pickLivelyAnimation(idx);
               const subtleAnim = pickSubtleAnimation(idx);
               const animClass =
                 animationMode === "lively"
                   ? `book-card-anim book-card-lively book-${livelyAnim}`
                   : `book-card-anim book-card-subtle book-${subtleAnim}`;
+
+              // Get genre icon/emoji for this card
+              const cardIcon =
+                GENRE_ICONS[genre.name] ||
+                <span style={{ fontSize: "2em", marginRight: 8 }}>{GENRE_EMOJIS[genre.name] || "📚"}</span>;
+
+              // Get visual indicators
+              const { rating, popularity } = getBookVisuals(book, idx);
 
               return (
                 <div
@@ -389,17 +498,67 @@ function App() {
                     }}
                   ></div>
                   <div className="book-card-content">
-                    <div className="book-cover-wrapper">
+                    <div className="book-cover-wrapper" style={{paddingBottom:"124px",marginBottom:".7rem"}}>
                       <img
                         src={book.image}
                         alt={`Cover of ${book.title}`}
                         className="book-cover"
                       />
+                      {/* Card Genre Icon */}
+                      <div
+                        aria-hidden="true"
+                        style={{
+                          position: "absolute",
+                          top: "0.78em",
+                          left: "0.86em",
+                          zIndex: 3,
+                          borderRadius: "999px",
+                          background: "rgba(255,255,255,0.93)",
+                          padding: "0.37em 0.37em 0.24em",
+                          boxShadow: "0 1.5px 5px #efefef55",
+                          fontSize: "1.45em",
+                          lineHeight: 1,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center"
+                        }}
+                        title={`${genre.name} genre`}
+                      >
+                        {GENRE_ICONS[genre.name]
+                          ? <span style={{ width:"1.6em",height:"1.6em",display:"flex",alignItems:"center",justifyContent:"center" }}>{GENRE_ICONS[genre.name]}</span>
+                          : <span role="img" aria-label={genre.name + " icon"} style={{fontSize:"1.6em"}}>{GENRE_EMOJIS[genre.name]}</span>
+                        }
+                      </div>
+                      {/* Rating/Popularity badge at corner */}
+                      <div
+                        aria-hidden="true"
+                        style={{
+                          position: "absolute",
+                          top: "0.7em",
+                          right: "0.72em",
+                          zIndex: 3,
+                          display: "flex",
+                          gap: "0.35em",
+                          alignItems: "center"
+                        }}
+                      >
+                        <PopularityBadge popularity={popularity} />
+                      </div>
                     </div>
-                    <div className="book-info">
-                      <div className="book-meta">
-                        <h4 className="book-title">{book.title}</h4>
-                        <span className="book-author">{book.author}</span>
+                    <div className="book-info" style={{marginTop:"-14px"}}>
+                      <div className="book-meta" style={{display:"flex",alignItems:"flex-start",gap:"0.5em",marginBottom:"4px"}}>
+                        <div style={{flex:1,minWidth:0}}>
+                          <h4 className="book-title" style={{marginBottom:"1.7px"}}>{book.title}</h4>
+                          <span className="book-author">{book.author}</span>
+                        </div>
+                        {/* Star Rating (to right of title/author) */}
+                        <div
+                          title={`Rating: ${rating} out of 5`}
+                          aria-label={`Rating: ${rating} out of 5`}
+                          style={{marginTop:"2px", marginLeft:"0.3em", flexShrink:0}}
+                        >
+                          <StarRating rating={rating} />
+                        </div>
                       </div>
                       <p className="book-description">{book.description}</p>
                       <a
